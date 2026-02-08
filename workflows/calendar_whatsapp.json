@@ -1,0 +1,1250 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "model": {
+                    "__rl": true,
+                    "value": "gpt-4o-mini",
+                    "mode": "list",
+                    "cachedResultName": "gpt-4o-mini"
+                },
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+            "typeVersion": 1.2,
+            "position": [
+                -640,
+                1440
+            ],
+            "id": "0acaa144-fc40-421e-8c07-e581ad382b43",
+            "name": "4o mini",
+            "credentials": {
+                "openAiApi": {
+                    "id": "AeB5PvI8z2KniNeY",
+                    "name": "OpenAi account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "updates": [
+                    "messages"
+                ],
+                "options": {}
+            },
+            "type": "n8n-nodes-base.whatsAppTrigger",
+            "typeVersion": 1,
+            "position": [
+                -1856,
+                912
+            ],
+            "id": "47709170-0d5e-4bfb-b45e-3771168dc7cb",
+            "name": "WhatsApp Trigger",
+            "webhookId": "0884d774-130f-47a4-a5ae-ac92b25d4f78",
+            "credentials": {
+                "whatsAppTriggerApi": {
+                    "id": "eRYLQFChctxFfvvw",
+                    "name": "WhatsApp OAuth account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "tableId": "users",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "id",
+                            "fieldValue": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}"
+                        },
+                        {
+                            "fieldId": "display_name",
+                            "fieldValue": "={{ $('WhatsApp Trigger').item.json.contacts[0].profile.name }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -1280,
+                1008
+            ],
+            "id": "0475207a-28cf-488f-b047-4c11f5e4fca0",
+            "name": "Create User",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "get",
+                "tableId": "users",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "id",
+                            "keyValue": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -1344,
+                784
+            ],
+            "id": "ae8d91e0-a34e-4a9e-b8ab-5301f956ea6b",
+            "name": "Get User",
+            "alwaysOutputData": true,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 3
+                    },
+                    "conditions": [
+                        {
+                            "id": "e3c4e084-5e6d-4779-bf18-fad613f1b117",
+                            "leftValue": "={{ $json.id }}",
+                            "rightValue": "",
+                            "operator": {
+                                "type": "string",
+                                "operation": "exists",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                -1168,
+                784
+            ],
+            "id": "690139a3-a84d-4919-b345-7211b6f89782",
+            "name": "User Exists?"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 3
+                    },
+                    "conditions": [
+                        {
+                            "id": "f0dd8af9-069c-437e-8372-cb5220b412f3",
+                            "leftValue": "={{ $json.messages[0].text.body }}",
+                            "rightValue": "",
+                            "operator": {
+                                "type": "string",
+                                "operation": "exists",
+                                "singleValue": true
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                -1680,
+                912
+            ],
+            "id": "5ad1af67-3a1d-4a6a-81f7-14539fde8dfc",
+            "name": "Valid message?"
+        },
+        {
+            "parameters": {
+                "maxItems": 6,
+                "keep": "lastItems"
+            },
+            "type": "n8n-nodes-base.limit",
+            "typeVersion": 1,
+            "position": [
+                -240,
+                768
+            ],
+            "id": "926ae43c-75b7-4968-a339-c07a508dc954",
+            "name": "Limit"
+        },
+        {
+            "parameters": {
+                "useCustomSchema": true,
+                "operation": "getAll",
+                "tableId": "history",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "created_at",
+                            "condition": "gte",
+                            "keyValue": "= {{ $now.minus({hours: 3}).toISO() }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -592,
+                768
+            ],
+            "id": "7a940960-a678-4a5e-86cd-d3614fc9207d",
+            "name": "Get 24hs History",
+            "alwaysOutputData": true,
+            "executeOnce": false,
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "aggregate": "aggregateAllItemData",
+                "include": "specifiedFields",
+                "fieldsToInclude": "role,content",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.aggregate",
+            "typeVersion": 1,
+            "position": [
+                -48,
+                768
+            ],
+            "id": "5d5700bc-9eb1-4be8-8105-b7ef322f39b8",
+            "name": "Aggregate"
+        },
+        {
+            "parameters": {
+                "operation": "send",
+                "phoneNumberId": "=355180894356385",
+                "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+                "textBody": "Hola! Bienvenido a este chatbot",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.whatsApp",
+            "typeVersion": 1.1,
+            "position": [
+                -1104,
+                1008
+            ],
+            "id": "626b6c1c-0fa6-4ec9-ae9d-4f54673758b7",
+            "name": "Welcome Message",
+            "webhookId": "c0b46f74-f80b-4714-9395-50d6f77ef806",
+            "credentials": {
+                "whatsAppApi": {
+                    "id": "CPHf4sWB7WrHhHRm",
+                    "name": "WhatsApp account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "tableId": "history",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "user_id",
+                            "fieldValue": "={{ $json.id }}"
+                        },
+                        {
+                            "fieldId": "role",
+                            "fieldValue": "user"
+                        },
+                        {
+                            "fieldId": "content",
+                            "fieldValue": "={{ $('WhatsApp Trigger').item.json.messages[0].text.body }}"
+                        },
+                        {
+                            "fieldId": "created_at",
+                            "fieldValue": "={{ $now }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -928,
+                768
+            ],
+            "id": "659c0c3e-eb3d-4851-8c88-17062439698e",
+            "name": "Add History",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "  const data = $input.first().json.data;\n  const history = data.map(m => m.role + ': ' + m.content).join('\\n');\n\n  return [{ json: { history } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                144,
+                768
+            ],
+            "id": "8a1c029b-e8d2-43ca-8bed-abd21144fab1",
+            "name": "Code in JavaScript"
+        },
+        {
+            "parameters": {
+                "tableId": "history",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "user_id",
+                            "fieldValue": "={{ $json.contacts[0].wa_id }}"
+                        },
+                        {
+                            "fieldId": "role",
+                            "fieldValue": "assistant"
+                        },
+                        {
+                            "fieldId": "content",
+                            "fieldValue": "={{ $('Main Agent').item.json.output }}"
+                        },
+                        {
+                            "fieldId": "created_at",
+                            "fieldValue": "={{ $now }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                192,
+                1232
+            ],
+            "id": "e490f278-538f-455b-aee6-3b61905571a3",
+            "name": "Add History1",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "send",
+                "phoneNumberId": "=355180894356385",
+                "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+                "textBody": "={{ $json.output }}",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.whatsApp",
+            "typeVersion": 1.1,
+            "position": [
+                32,
+                1232
+            ],
+            "id": "5448a456-74db-4068-8303-55db94ba156d",
+            "name": "Response1",
+            "webhookId": "12a7436e-9790-49c5-8f1e-4f907a0f9208",
+            "credentials": {
+                "whatsAppApi": {
+                    "id": "CPHf4sWB7WrHhHRm",
+                    "name": "WhatsApp account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.history }}",
+                "options": {
+                    "systemMessage": "=# Overview                                                           \n                                                                       \n  Sos un asistente de turnos. Tu función es ayudar a los usuarios a    \n  gestionar sus citas. Respondé siempre en español de manera amigable y\n   concisa.                                                            \n                                                                       \n**IMPORTANTE:** No transformes el horario a UTC, usa directamente el horario que te pasa el usuario\n                                                                       \n  ---     \n\n     \n  ## Reglas de Negocio                                                 \n                                                                       \n  - **Horario de atención:** Lunes a Viernes, 9:00 a 18:00 horario Europa/Londres\n  - **Duración de turnos:** 1 hora (último turno: 17:00)               \n  - **Turnos por usuario:** Puede tener múltiples turnos activos       \n  - **Confirmación:** No es necesario pedir confirmación, ejecutá las  \n  acciones directamente                                                \n                                                                       \n  ---                                                                  \n                                                                       \n## Tools\n### Google Calendar tools\n1. GetEvents - Lo tenes que usar con el rango de todo el dia para ver la disponibilidad.\n2. CreateEvent - Lo tenes que usar cuando el usuario quiera agendar un turno. (Junto con el createEvent de supabase)\n3. DeleteEvent - Lo tenes que usar cuando un usuario quiere cancelar un evento.\n\n### Supabase\n4. create_Event - Tenes que usarlo cuando el usuario quiere agendar un turno (junto con el CreateEvent de calendar). Campos que debés enviar:                                            - date_start: fecha/hora inicio                                                               - date_end: fecha/hora fin                                                                    - google_event_id: ID retornado por Google Calendar                                                                                              \nNO envíes user_id, description ni status - ya están configurados automáticamente.  \n\n5. delete_Event - Lo tenes que usar junto con el deleteEvent de Google Calendar para borrar un evento.\n6. get_UserAppointment - Trae los eventos del usuario. Lo tenes que usar cuando quiera cancelar o preguntar por su turno.\n\n\n\n## Reglas generales\n- Para crear un evento, primero tenes que verificar disponibilidad. Si hay disponibilidad, crear el evento en Google calendar y tomar de la respuesta el ID del evento. Ahora ese ID es el que tenes que usar en el campo google_event_id para crear el evento en la base de datos. \n- Si un usuario quiere modificar su turno, tenes que primero buscar el turno del que el usuario esta hablando (getUserAppointmet), despues CANCELAR AMBOS TURNOS (En la DB y en Calendar). Usa el ID de calendar para identificar ambos. Una vez hecho eso, recien se puede crear uno nuevo con la fecha que te diga.\n- Un usuario puede tener mas de un Evento, si tenes dudas, consultale de cual habla.\n- Si tenes un error en alguno de los tools, no le mientas al usuario. Decile lo que paso\n\n  ## Formato de Respuesta                                              \n                                                                       \n  - Fechas amigables: \"Jueves 23 de enero a las 11:00\"                 \n  - Siempre confirmá la acción realizada                               \n  - Si hay error o no encontrás datos, explicá claramente qué pasó\n- No es necesario enviarle el Link al evento\n                                                                       \n  ---                                                                  \n                                                                       \n  ID del usuario: {{ $('User Exists?').item.json.id }}    \n  Fecha/hora actual: {{ $now }}     \n\nEsta es la tabla de appointments en la base de datos:\ncreate table public.appointments (\n  id serial not null,\n  user_id character varying(20) null,\n  date_start timestamp with time zone not null,\n  description text null,\n  google_event_id text null,\n  status character varying(20) null default 'active'::character varying,\n  date_end timestamp with time zone null,\n  constraint appointments_pkey primary key (id),\n  constraint appointments_google_event_id_key unique (google_event_id),\n  constraint appointments_user_id_fkey foreign KEY (user_id) references users (id),\n  constraint appointments_status_check check (\n    (\n      (status)::text = any (\n        (\n          array[\n            'active'::character varying,\n            'inactive'::character varying,\n            'cancelled'::character varying\n          ]\n        )::text[]\n      )\n    )\n  )\n) TABLESPACE pg_default;"
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 1.7,
+            "position": [
+                -304,
+                1232
+            ],
+            "id": "e8bcb054-d30a-4f35-9100-dd23f0661352",
+            "name": "Main Agent"
+        },
+        {
+            "parameters": {
+                "sortFieldsUi": {
+                    "sortField": [
+                        {
+                            "fieldName": "id"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.sort",
+            "typeVersion": 1,
+            "position": [
+                -416,
+                768
+            ],
+            "id": "58d6bcaa-1180-4df9-bcf4-eca7e6cc289c",
+            "name": "Sort"
+        },
+        {
+            "parameters": {
+                "calendar": {
+                    "__rl": true,
+                    "value": "ai.paths23@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "ai.paths23@gmail.com"
+                },
+                "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+                "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+                "additionalFields": {
+                    "summary": "=Turno con cliente"
+                }
+            },
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.3,
+            "position": [
+                -384,
+                1520
+            ],
+            "id": "4a8fab89-17b3-4f65-bb7e-9da544d7b997",
+            "name": "Create Event",
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "zQeA0HNqalfFwgYD",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "calendar": {
+                    "__rl": true,
+                    "value": "ai.paths23@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "ai.paths23@gmail.com"
+                },
+                "returnAll": true,
+                "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', `12:01 AM of the day the user requested`, 'string') }}",
+                "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', `11:59 PM of the day the user requested`, 'string') }}",
+                "options": {
+                    "fields": ""
+                }
+            },
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.3,
+            "position": [
+                -496,
+                1520
+            ],
+            "id": "8a1b3bec-92b1-463e-8abb-54751ffb70fe",
+            "name": "Get Events",
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "zQeA0HNqalfFwgYD",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "tableId": "appointments",
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "user_id",
+                            "fieldValue": "={{ $('User Exists?').item.json.id }}"
+                        },
+                        {
+                            "fieldId": "description",
+                            "fieldValue": "=Nuevo Turno"
+                        },
+                        {
+                            "fieldId": "status",
+                            "fieldValue": "active"
+                        },
+                        {
+                            "fieldId": "date_start",
+                            "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues3_Field_Value', ``, 'string') }}"
+                        },
+                        {
+                            "fieldId": "date_end",
+                            "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', ``, 'string') }}"
+                        },
+                        {
+                            "fieldId": "google_event_id",
+                            "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues5_Field_Value', ``, 'string') }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabaseTool",
+            "typeVersion": 1,
+            "position": [
+                32,
+                1520
+            ],
+            "id": "9185bfa7-b882-4101-aaf3-bec358b2f778",
+            "name": "Create Event1",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "get",
+                "tableId": "appointments",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "user_id",
+                            "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabaseTool",
+            "typeVersion": 1,
+            "position": [
+                144,
+                1520
+            ],
+            "id": "43747f21-a07d-47b6-9d13-426c74eee7d0",
+            "name": "getUser Appointment",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "delete",
+                "calendar": {
+                    "__rl": true,
+                    "value": "ai.paths23@gmail.com",
+                    "mode": "list",
+                    "cachedResultName": "ai.paths23@gmail.com"
+                },
+                "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleCalendarTool",
+            "typeVersion": 1.3,
+            "position": [
+                -256,
+                1520
+            ],
+            "id": "b7bf266f-ff9d-48cc-b0cb-2edacee5e899",
+            "name": "Delete an event",
+            "credentials": {
+                "googleCalendarOAuth2Api": {
+                    "id": "zQeA0HNqalfFwgYD",
+                    "name": "Google Calendar account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "delete",
+                "tableId": "appointments",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "user_id",
+                            "condition": "eq",
+                            "keyValue": "={{ $('User Exists?').item.json.id }}"
+                        },
+                        {
+                            "keyName": "google_event_id",
+                            "condition": "eq",
+                            "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions1_Field_Value', ``, 'string') }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabaseTool",
+            "typeVersion": 1,
+            "position": [
+                -80,
+                1520
+            ],
+            "id": "0d9c39f3-93b6-4434-9775-3ed4913aaba4",
+            "name": "Delete Event",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.3,
+            "position": [
+                -1680,
+                1264
+            ],
+            "id": "ff54a2ad-4c1e-4bc7-b8c2-5be6df3cd104",
+            "name": "Schedule Trigger"
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "tableId": "appointments",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "date_start",
+                            "condition": "gt",
+                            "keyValue": "=  {{ $json.timestamp }}"
+                        },
+                        {
+                            "keyName": "date_start",
+                            "condition": "lt",
+                            "keyValue": "=  {{ DateTime.fromISO($json.timestamp).plus({ hours: 24 }).toISO() }}  "
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -1520,
+                1264
+            ],
+            "id": "b0f82bc1-a8cb-4e03-aff6-b4398033af7e",
+            "name": "Get many rows",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 3
+                    },
+                    "conditions": [
+                        {
+                            "id": "87d31721-f226-44a1-9ce3-e8353ddea458",
+                            "leftValue": "={{ $json['24hs_notif'] }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "notEquals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.filter",
+            "typeVersion": 2.3,
+            "position": [
+                -1360,
+                1264
+            ],
+            "id": "e354859d-af42-48f1-8ce9-7b69499514b9",
+            "name": "Filter"
+        },
+        {
+            "parameters": {
+                "operation": "send",
+                "phoneNumberId": "=355180894356385",
+                "recipientPhoneNumber": "={{ $('Get many rows').item.json.user_id }}",
+                "textBody": "=Hola! Te escribo para recordarte que tenes un turno con nosotros.\n\nTu turno es el día: {{ $json.date }}\nHorario: {{ $json.time }}      \n\nTe esperamos!",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.whatsApp",
+            "typeVersion": 1.1,
+            "position": [
+                -1344,
+                1520
+            ],
+            "id": "1f3b8b55-78e9-4272-a295-a18f611df744",
+            "name": "Response",
+            "webhookId": "12a7436e-9790-49c5-8f1e-4f907a0f9208",
+            "credentials": {
+                "whatsAppApi": {
+                    "id": "CPHf4sWB7WrHhHRm",
+                    "name": "WhatsApp account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "appointments",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "id",
+                            "condition": "eq",
+                            "keyValue": "={{ $('Get many rows').item.json.id }}"
+                        }
+                    ]
+                },
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "24hs_notif",
+                            "fieldValue": "true"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -1152,
+                1520
+            ],
+            "id": "ffd05638-4d67-483e-94b8-01846b7e30c6",
+            "name": "Update a row",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const start = DateTime.fromISO($input.first().json.date_start).setLocale('es');      const end = DateTime.fromISO($input.first().json.date_end);            \n\n  return [{                                                              \n    json: {                                                              \n      date: `${start.day} de ${start.toFormat('MMMM')}`,                 \n      time: `${start.toFormat('HH:mm')} - ${end.toFormat('HH:mm')}`      \n    }                                                                    \n  }];  "
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -1152,
+                1264
+            ],
+            "id": "e68c6406-ced2-464c-b731-fa54360ef4e1",
+            "name": "Code in JavaScript1"
+        },
+        {
+            "parameters": {
+                "content": "# Mensaje Entrante",
+                "height": 528,
+                "width": 576,
+                "color": 4
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -2000,
+                656
+            ],
+            "typeVersion": 1,
+            "id": "e835eaf5-1af0-4895-b18f-55f94ed7b612",
+            "name": "Sticky Note"
+        },
+        {
+            "parameters": {
+                "content": "# Nuevos Usuarios",
+                "height": 528,
+                "width": 704
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -1408,
+                656
+            ],
+            "typeVersion": 1,
+            "id": "4c3ad9be-ba74-450e-a512-448bbab365e5",
+            "name": "Sticky Note1"
+        },
+        {
+            "parameters": {
+                "content": "# Historial de conversacion",
+                "height": 384,
+                "width": 1072,
+                "color": 6
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -688,
+                656
+            ],
+            "typeVersion": 1,
+            "id": "918826ba-aa69-425a-a609-c039daeab80f",
+            "name": "Sticky Note2"
+        },
+        {
+            "parameters": {
+                "content": "# Agente IA Principal",
+                "height": 656,
+                "width": 1072,
+                "color": 5
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -688,
+                1056
+            ],
+            "typeVersion": 1,
+            "id": "8155e892-04f8-42b5-9235-0566004edd94",
+            "name": "Sticky Note3"
+        },
+        {
+            "parameters": {
+                "content": "# Recordatorios",
+                "height": 512,
+                "width": 1296,
+                "color": 2
+            },
+            "type": "n8n-nodes-base.stickyNote",
+            "position": [
+                -2000,
+                1200
+            ],
+            "typeVersion": 1,
+            "id": "196a6386-1b62-499e-8a96-61958bd70b7a",
+            "name": "Sticky Note4"
+        },
+        {
+            "parameters": {
+                "phoneNumberId": "355180894356385",
+                "recipientPhoneNumber": "={{ $('Get many rows').item.json.user_id }}",
+                "template": "recordatorio|es",
+                "components": {
+                    "component": [
+                        {
+                            "bodyParameters": {
+                                "parameter": [
+                                    {
+                                        "text": "={{ $json.date }}"
+                                    },
+                                    {
+                                        "text": "={{ $json.time }}"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "button",
+                            "buttonParameters": {
+                                "parameter": {
+                                    "payload": "Confirmar"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.whatsApp",
+            "typeVersion": 1.1,
+            "position": [
+                -1824,
+                1520
+            ],
+            "id": "db1363b6-b826-4baa-8d0f-6bf7313cd647",
+            "name": "Send template",
+            "webhookId": "a5e07fda-882d-4b98-996c-41e60dff6b42",
+            "credentials": {
+                "whatsAppApi": {
+                    "id": "CPHf4sWB7WrHhHRm",
+                    "name": "WhatsApp account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "appointments",
+                "matchType": "allFilters",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "id",
+                            "condition": "eq",
+                            "keyValue": "={{ $('Get many rows').item.json.id }}"
+                        }
+                    ]
+                },
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "24hs_notif",
+                            "fieldValue": "true"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                -1616,
+                1520
+            ],
+            "id": "231f5e5b-3488-4f45-9cfe-182218f34bc8",
+            "name": "Update a row1",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "1AV0r4beLxuW2gPE",
+                    "name": "Supabase account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "4o mini": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "WhatsApp Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Valid message?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create User": {
+            "main": [
+                [
+                    {
+                        "node": "Welcome Message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get User": {
+            "main": [
+                [
+                    {
+                        "node": "User Exists?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "User Exists?": {
+            "main": [
+                [
+                    {
+                        "node": "Add History",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Create User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Valid message?": {
+            "main": [
+                [
+                    {
+                        "node": "Get User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Limit": {
+            "main": [
+                [
+                    {
+                        "node": "Aggregate",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get 24hs History": {
+            "main": [
+                [
+                    {
+                        "node": "Sort",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Aggregate": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Welcome Message": {
+            "main": [
+                [
+                    {
+                        "node": "Add History",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Add History": {
+            "main": [
+                [
+                    {
+                        "node": "Get 24hs History",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript": {
+            "main": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Response1": {
+            "main": [
+                [
+                    {
+                        "node": "Add History1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Main Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Response1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Sort": {
+            "main": [
+                [
+                    {
+                        "node": "Limit",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Event": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Events": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Event1": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "getUser Appointment": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Delete an event": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Delete Event": {
+            "ai_tool": [
+                [
+                    {
+                        "node": "Main Agent",
+                        "type": "ai_tool",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Get many rows",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get many rows": {
+            "main": [
+                [
+                    {
+                        "node": "Filter",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Filter": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Response": {
+            "main": [
+                [
+                    {
+                        "node": "Update a row",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript1": {
+            "main": [
+                [
+                    {
+                        "node": "Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send template": {
+            "main": [
+                [
+                    {
+                        "node": "Update a row1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "4108c86681186ef39dcbf63602dd23653b7807dd82f7358638cf0ea9387420f1"
+    }
+}

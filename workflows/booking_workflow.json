@@ -1,0 +1,377 @@
+{
+  "name": "booking_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "recovery-booking",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0e9eb885-f467-491b-9fa1-1821f924d00d",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "recovery-booking"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recibir datos del Webhook\nconst body = $('Webhook').first().json.body;\n\n// Extraer solo la parte YYYY-MM-DD de la fecha ISO\nconst datePart = body.bookingDate.split('T')[0];\n\n// Construir fecha de inicio (ISO Argentina)\nconst startDateStr = `${datePart}T${body.bookingTime}:00-03:00`;\nconst startDate = new Date(startDateStr);\n\n// Calcular fecha de fin (+45 min)\nconst endDate = new Date(startDate.getTime() + 45 * 60000);\n\n// Extraer datos del cliente\nconst clientName = body.name || 'Cliente';\nconst clientDni = body.dni || 'DNI';\nconst phone = body.phone || 'No especificado';\nconst email = body.email || '';\nconst gym = body.gym || 'No especificado';\nconst discipline = body.discipline || 'No especificado';\nconst painZone = body.painZone || 'No especificado';\nconst services = body.interests ? body.interests.join(', ') : 'No especificados';\n\n// ========== LÓGICA DE PRECIOS ==========\nconst BASE_PRICE = 30000;\n\nconst sportDiscounts = {\n  // Agregar Clubes aquí cuando sea necesario\n};\n\nconst clubDiscounts = {\n  // Agregar Clubes/Gym/Código aquí cuando sea necesario\n};\n\nconst codeDiscounts = {\n  // Agregar Clubes/Gym/Código aquí cuando sea necesario\n  'LISANDRO30': 30,\n  'CCRISTOBAL50': 50,\n};\n\nlet sportDiscount = sportDiscounts[discipline] || 0;\nlet clubDiscount = clubDiscounts[gym] || 0;\nlet maxDiscount = Math.max(sportDiscount, clubDiscount);\n\nlet finalPrice = BASE_PRICE;\nlet displayPrice = BASE_PRICE;\nlet hasDiscount = maxDiscount > 0;\n\nif (hasDiscount) {\n  finalPrice = Math.round(BASE_PRICE * (1 - maxDiscount / 100));\n  displayPrice = Math.round(BASE_PRICE * 1.2);\n}\n\n// Descripción para Calendar (con precios)\nconst calendarDescription = `Cliente: ${clientName}\nDNI: ${clientDni}\nTeléfono: ${phone}\nEmail: ${email}\nClub/Gimnasio: ${gym}\nDeporte: ${discipline}\nConocimiento R: ${painZone}\nServicios: ${services}\nPrecio: $${finalPrice}${hasDiscount ? ` (Descuento ${maxDiscount}% aplicado)` : ''}`;\n\n// Retornar datos en AMBAS estructuras\nreturn [{\n    json: {\n        // ===== CAMPOS PARA CALENDAR (estructura original) =====\n        summary: `Reserva Recovery: ${clientName}`,\n        description: calendarDescription,\n        start: startDateStr,\n        end: endDate.toISOString(),\n        \n        // ===== DATOS DEL CLIENTE (para Gmail y Sheets) =====\n        clientData: {\n            name: clientName,\n            dni: clientDni,\n            email: email,\n            phone: phone,\n            bookingDate: datePart,\n            bookingTime: body.bookingTime,\n            services: services,\n            discipline: discipline,\n            gym: gym,\n            knowledgeLevel: painZone,\n            frequency: body.frequency || 'No especificado',\n            notes: body.notes || ''\n        },\n        \n        // ===== DATOS DE PRECIOS (para Gmail) =====\n        pricingData: {\n            basePrice: BASE_PRICE,\n            displayPrice: displayPrice,\n            finalPrice: finalPrice,\n            discountPercentage: maxDiscount,\n            hasDiscount: hasDiscount,\n            discountSource: sportDiscount > clubDiscount ? `Deporte: ${discipline}` : `Club: ${gym}`\n        }\n    }\n}];"
+      },
+      "id": "e8a358fe-fe9f-4cba-bb0f-f4ef6aef4220",
+      "name": "Format Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "fcc5192cb0368b6750b783f37e56d832a2ab00090918fff17ea6e90f4f41c0d9@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Turnos Recovery"
+        },
+        "start": "={{ $json.start }}",
+        "end": "={{ DateTime.fromISO($json.start).plus({ minutes: 90 }) }}",
+        "additionalFields": {
+          "description": "={{ $json.description }}",
+          "summary": "={{ $json.summary }}"
+        }
+      },
+      "id": "e81494cd-1a1b-4cf1-8f1a-c814d4b89ade",
+      "name": "Google Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -176
+      ],
+      "notesInFlow": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "lgr0mj89rhPxbQ6t",
+          "name": "Google Calendar account"
+        }
+      },
+      "notes": "Connect Account & Select Calendar"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "371ab3fa-977c-439e-bbd9-6163a743c26e",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        512,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Sl4H2ZC5D0i9UjLpUHlnvA1JCGt-w0UHHqKQ7AQjTZE",
+          "mode": "list",
+          "cachedResultName": "Recovery Prueba",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Sl4H2ZC5D0i9UjLpUHlnvA1JCGt-w0UHHqKQ7AQjTZE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Historial Reservas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Sl4H2ZC5D0i9UjLpUHlnvA1JCGt-w0UHHqKQ7AQjTZE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $json.clientData.bookingDate }}",
+            "Deporte": "={{$json.clientData.discipline}}",
+            "Hora": "={{$json.clientData.bookingTime}}",
+            "Nombre": "={{$json.clientData.name}}",
+            "Email": "={{$json.clientData.email}}",
+            "Telefono": "={{$json.clientData.phone}}",
+            "Conocimiento R": "={{$json.clientData.knowledgeLevel}}",
+            "Frecuencia": "={{$json.clientData.frequency}}",
+            "Servicios": "={{$json.clientData.services}}",
+            "Club/Gym": "={{$json.clientData.gym}}",
+            "Descuento Deporte %": "={{$json.pricingData.discountPercentage}}",
+            "Descuento Club %": "={{$json.pricingData.discountPercentage}}",
+            "Descuento Aplicado %": "={{$json.pricingData.discountPercentage}}",
+            "Precio Mostrado": "={{$json.pricingData.displayPrice}}",
+            "Precio Final": "={{$json.pricingData.finalPrice}}",
+            "DNI": "={{ $json.clientData.dni }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora",
+              "displayName": "Hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefono",
+              "displayName": "Telefono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Club/Gym",
+              "displayName": "Club/Gym",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Deporte",
+              "displayName": "Deporte",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Frecuencia",
+              "displayName": "Frecuencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Conocimiento R",
+              "displayName": "Conocimiento R",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Servicios",
+              "displayName": "Servicios",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descuento Deporte %",
+              "displayName": "Descuento Deporte %",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Descuento Club %",
+              "displayName": "Descuento Club %",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Descuento Aplicado %",
+              "displayName": "Descuento Aplicado %",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Precio Mostrado",
+              "displayName": "Precio Mostrado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Precio Final",
+              "displayName": "Precio Final",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        512,
+        0
+      ],
+      "id": "35ee656c-8f60-4a95-a554-dcd3ad6d9e31",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Hz1R9v3lrJ0BFBdm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientData.email }}",
+        "subject": "✅ Confirmación de Reserva - R2Recovery Wellness",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Confirmación de Reserva - Recovery Wellness</title>\n</head>\n<body style=\"margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif;background-color:#020617;color:#F8FAFC\">\n    <table role=\"presentation\" style=\"width:100%;border-collapse:collapse;background-color:#020617\">\n        <tr>\n            <td align=\"center\" style=\"padding:40px 20px\">\n                <table role=\"presentation\" style=\"max-width:600px;width:100%;border-collapse:collapse;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(190,242,100,0.1)\">\n                    <tr>\n                        <td style=\"padding:40px 40px 30px;text-align:center;background:linear-gradient(135deg,#1e293b 0%,#334155 100%);border-bottom:2px solid #bef264\">\n                            <h1 style=\"margin:0;font-size:28px;font-weight:700;color:#bef264;letter-spacing:-0.5px\">✅ Reserva Confirmado</h1>\n                            <p style=\"margin:8px 0 0;font-size:14px;color:#94A3B8\">Recovery Wellness</p>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding:30px 40px 20px\">\n                            <p style=\"margin:0;font-size:16px;color:#F8FAFC;line-height:1.6\">Hola <strong style=\"color:#bef264\">{{ $json.clientData.name }}</strong>,</p>\n                            <p style=\"margin:12px 0 0;font-size:16px;color:#CBD5E1;line-height:1.6\">Tu reserva ha sido confirmado exitosamente. A continuación encontrarás todos los detalles:</p>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding:20px 40px\">\n                            <table role=\"presentation\" style=\"width:100%;border-collapse:collapse;background-color:#1e293b;border-radius:12px;overflow:hidden\">\n                                <tr>\n                                    <td style=\"padding:20px\">\n                                        <h2 style=\"margin:0 0 16px;font-size:18px;font-weight:600;color:#bef264;border-bottom:1px solid #334155;padding-bottom:12px\">📅 Detalles de la Reserva</h2>\n                                        <table role=\"presentation\" style=\"width:100%;border-collapse:collapse;margin-bottom:12px\">\n                                            <tr>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#94A3B8;width:40%\">Fecha:</td>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#F8FAFC;font-weight:500\">{{ $json.clientData.bookingDate }}</td>\n                                            </tr>\n                                            <tr>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#94A3B8\">Horario:</td>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#F8FAFC;font-weight:500\">{{ $json.clientData.bookingTime }}</td>\n                                            </tr>\n                                            <tr>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#94A3B8\">Servicios:</td>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#F8FAFC;font-weight:500\">{{ $json.clientData.services }}</td>\n                                            </tr>\n                                        </table>\n                                    </td>\n                                </tr>\n                            </table>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding:20px 40px\">\n                            <table role=\"presentation\" style=\"width:100%;border-collapse:collapse;background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:12px;overflow:hidden;border:2px solid #bef264\">\n                                <tr>\n                                    <td style=\"padding:20px\">\n                                        <h2 style=\"margin:0 0 16px;font-size:18px;font-weight:600;color:#bef264;border-bottom:1px solid #334155;padding-bottom:12px\">💰 Detalles de Pago</h2>\n                                        <table role=\"presentation\" style=\"width:100%;border-collapse:collapse\">\n                                            <tr style=\"border-top:2px solid #334155\">\n                                                <td style=\"padding:16px 0 8px;font-size:18px;color:#F8FAFC;font-weight:700\">Total a pagar:</td>\n                                                <td style=\"padding:16px 0 8px;font-size:24px;color:#bef264;text-align:right;font-weight:700\">${{ $json.pricingData.finalPrice }}</td>\n                                            </tr>\n                                            <tr>\n                                                <td colspan=\"2\" style=\"padding:8px 0\">\n                                                    <div style=\"background-color:#22c55e;color:#020617;padding:8px 12px;border-radius:8px;text-align:center;font-weight:600;font-size:14px\">🎉 Descuento aplicado: LANZAMIENTO</div>\n                                                </td>\n                                            </tr>\n                                        </table>\n                                    </td>\n                                </tr>\n                            </table>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding:20px 40px\">\n                            <table role=\"presentation\" style=\"width:100%;border-collapse:collapse;background-color:#1e293b;border-radius:12px;overflow:hidden\">\n                                <tr>\n                                    <td style=\"padding:20px\">\n                                        <h2 style=\"margin:0 0 16px;font-size:18px;font-weight:600;color:#bef264;border-bottom:1px solid #334155;padding-bottom:12px\">🏦 Datos para Transferencia</h2>\n                                        <table role=\"presentation\" style=\"width:100%;border-collapse:collapse\">\n                                            <tr>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#94A3B8;width:35%\">Alias:</td>\n                                                <td style=\"padding:8px 0;font-size:16px;color:#bef264;font-weight:600;font-family:Courier New,monospace\">R2recovery</td>\n                                            </tr>\n                                            <tr>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#94A3B8\">CVU:</td>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#F8FAFC;font-family:Courier New,monospace\">1430001713002512080015</td>\n                                            </tr>\n                                            <tr>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#94A3B8\">Titular:</td>\n                                                <td style=\"padding:8px 0;font-size:14px;color:#F8FAFC;font-weight:500\">Cristobal Carbone</td>\n                                            </tr>\n                                        </table>\n                                        <div style=\"margin-top:16px;padding:12px;background-color:#0f172a;border-radius:8px;border-left:3px solid #bef264\">\n                                            <p style=\"margin:0;font-size:13px;color:#CBD5E1;line-height:1.5\"><strong style=\"color:#bef264\">Importante:</strong> Por favor realiza la transferencia y envía el comprobante por WhatsApp para CONFIRMAR tu turno.</p>\n                                        </div>\n                                    </td>\n                                </tr>\n                            </table>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding:20px 40px 30px\">\n                            <table role=\"presentation\" style=\"width:100%;border-collapse:collapse;background-color:#1e293b;border-radius:12px;overflow:hidden\">\n                                <tr>\n                                    <td style=\"padding:20px;text-align:center\">\n                                        <p style=\"margin:0 0 8px;font-size:14px;color:#94A3B8\">¿Necesitas ayuda o querés reprogramar?</p>\n                                        <p style=\"margin:0;font-size:16px;color:#bef264;font-weight:600\">📱 WhatsApp: <a href=\"https://wa.me/541178266263\" style=\"color:#bef264;text-decoration:none\">11-7826-6263</a></p>\n                                        <p style=\"margin:4px 0 0;font-size:14px;color:#CBD5E1\">Cristóbal - Recovery Wellness</p>\n                                    </td>\n                                </tr>\n                            </table>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding:30px 40px;text-align:center;background-color:#0f172a;border-top:1px solid #334155\">\n                            <p style=\"margin:0 0 8px;font-size:13px;color:#64748B\">Powered by <strong style=\"color:#bef264\">BOSS® Recovery</strong></p>\n                            <p style=\"margin:0;font-size:12px;color:#475569\">Te esperamos • ¡Nos vemos pronto!</p>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>",
+        "options": {
+          "replyToSenderOnly": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        320
+      ],
+      "id": "7422d501-007d-449e-b8b1-4bc749ff0920",
+      "name": "Send a message",
+      "webhookId": "8dbd8be3-00ce-4188-998c-89672e861cc8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "D5w3qw2n9nFwcYyO",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Data": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "main": [
+        []
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "321cb899-65d5-4dfe-b03c-675e59698d75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d07bef6ca458cfbd3e5abf17def9736eab7dda4656fd3d5b358ee53de1bb5335"
+  },
+  "id": "qISoaAC3GfA8SXKN",
+  "tags": []
+}

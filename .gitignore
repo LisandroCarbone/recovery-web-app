@@ -1,0 +1,6 @@
+node_modules/
+n8n_recovery_data/
+*.zip
+.env
+.DS_Store
+.vscode/

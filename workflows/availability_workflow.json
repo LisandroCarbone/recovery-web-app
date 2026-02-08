@@ -1,0 +1,132 @@
+{
+  "name": "availability_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "recovery-availability",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "75bd8c9c-0ceb-45c6-90f0-e02cc4d449e8",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "recovery-availability"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "fcc5192cb0368b6750b783f37e56d832a2ab00090918fff17ea6e90f4f41c0d9@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Turnos Recovery"
+        },
+        "returnAll": true,
+        "options": {
+          "timeMin": "={{$json.query.date}}T08:00:00-03:00",
+          "timeMax": "={{$json.query.date}}T20:00:00-03:00",
+          "singleEvents": true
+        }
+      },
+      "id": "26927fa3-77cf-4487-acf1-4396afe353e1",
+      "name": "Google Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ],
+      "notesInFlow": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "lgr0mj89rhPxbQ6t",
+          "name": "Google Calendar account"
+        }
+      },
+      "notes": "Connect your Account Here"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Configuración\nconst capacity = 2; // Máximo 2 personas\n\n// 1. Procesar Eventos Existentes (Igual que antes)\nconst existingEvents = items\n    .filter(item => item.json.start && item.json.start.dateTime)\n    .map(item => ({\n        start: new Date(item.json.start.dateTime).getTime(),\n        end: new Date(item.json.end.dateTime).getTime()\n    }));\n\nconst availableSlots = [];\n\n// 2. Fecha Solicitada (Igual que antes)\nlet requestedDateStr;\ntry {\n    requestedDateStr = $('Webhook').first().json.query.date;\n} catch (e) {\n    const now = new Date();\n    const arTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));\n    requestedDateStr = arTime.toISOString().split('T')[0];\n}\n\n// 3. DEFINIR TURNOS FIJOS (CADA 90 MIN) \n// Esta es la parte clave que reemplaza el bucle \"for (h < startHour)\"\nconst fixedStartTimes = [\n  \"08:00\", \"09:30\", \"11:00\", \"12:30\", \n  \"14:00\", \"15:30\", \"17:00\", \"18:30\"\n];\n\nfor (const startTime of fixedStartTimes) {\n    // Construir fecha ISO (-03:00 Argentina)\n    const slotStartISO = `${requestedDateStr}T${startTime}:00-03:00`;\n    \n    // Calcular Fin de Slot (+90 Minutos)\n    const startObj = new Date(slotStartISO);\n    const endObj = new Date(startObj.getTime() + 90 * 60000); // 90 min en ms\n    \n    const slotStartMs = startObj.getTime();\n    const slotEndMs = endObj.getTime();\n\n    // 4. Verificar Disponibilidad (Tu lógica original impecable)\n    const concurrentEvents = existingEvents.filter(event => {\n        // (InicioEvento < FinSlot) Y (FinEvento > InicioSlot)\n        return (event.start < slotEndMs && event.end > slotStartMs);\n    });\n\n    if (concurrentEvents.length < capacity) {\n        availableSlots.push(startTime);\n    }\n}\n\nreturn [{ json: { slots: availableSlots } }];"
+      },
+      "id": "1e3e2454-3e0e-42a5-9934-e8e2bda9222c",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7b9ef6bf-cefc-4dda-b29e-c7580aeeedc7",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        672,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "3edf0582-ec4a-4446-a5e4-73438093ed0f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d07bef6ca458cfbd3e5abf17def9736eab7dda4656fd3d5b358ee53de1bb5335"
+  },
+  "id": "x5wg4KD7w8rRyD1T",
+  "tags": []
+}
