@@ -35,7 +35,7 @@ const NavBar = () => {
                                 className="absolute top-full left-0 mt-2 w-40 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-xl overflow-hidden flex flex-col p-1"
                             >
                                 <a
-                                    href="https://wa.me/5491178266263"
+                                    href="https://wa.me/5491164831015"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all"
