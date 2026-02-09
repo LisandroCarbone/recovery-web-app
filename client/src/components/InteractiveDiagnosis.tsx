@@ -249,13 +249,22 @@ const InteractiveDiagnosis = () => {
                                     {errors.interests && <span className="text-red-400 text-xs">{errors.interests.message}</span>}
                                 </div>
 
-                                <button
-                                    onClick={handleProfileSubmit}
-                                    type="button"
-                                    className="w-full bg-accent text-slate-900 font-bold py-4 rounded-xl hover:bg-lime-400 transition-colors flex items-center justify-center gap-2"
-                                >
-                                    Continuar
-                                </button>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setStep(1)}
+                                        type="button"
+                                        className="w-1/3 bg-slate-800 text-slate-300 font-bold py-4 rounded-xl hover:bg-slate-700 transition-colors"
+                                    >
+                                        Volver
+                                    </button>
+                                    <button
+                                        onClick={handleProfileSubmit}
+                                        type="button"
+                                        className="w-2/3 bg-accent text-slate-900 font-bold py-4 rounded-xl hover:bg-lime-400 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        Continuar
+                                    </button>
+                                </div>
                             </motion.div>
                         )}
 
@@ -274,16 +283,25 @@ const InteractiveDiagnosis = () => {
 
                                 <BookingScheduler onSelect={(date, time) => setBookingData({ date, time })} />
 
-                                <button
-                                    onClick={handleSubmit(onSubmit, (errors) => {
-                                        console.log('Form Errors:', errors);
-                                        alert('Falta completar datos correctamente: ' + Object.keys(errors).join(', '));
-                                    })}
-                                    disabled={isSubmitting || !bookingData}
-                                    className="w-full bg-accent text-slate-900 font-bold py-4 rounded-xl hover:bg-lime-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
-                                >
-                                    {isSubmitting ? <Loader2 className="animate-spin" /> : 'Confirmar Reserva'}
-                                </button>
+                                <div className="flex gap-3 mt-4">
+                                    <button
+                                        onClick={() => setStep(2)}
+                                        type="button"
+                                        className="w-1/3 bg-slate-800 text-slate-300 font-bold py-4 rounded-xl hover:bg-slate-700 transition-colors"
+                                    >
+                                        Volver
+                                    </button>
+                                    <button
+                                        onClick={handleSubmit(onSubmit, (errors) => {
+                                            console.log('Form Errors:', errors);
+                                            alert('Falta completar datos correctamente: ' + Object.keys(errors).join(', '));
+                                        })}
+                                        disabled={isSubmitting || !bookingData}
+                                        className="w-2/3 bg-accent text-slate-900 font-bold py-4 rounded-xl hover:bg-lime-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isSubmitting ? <Loader2 className="animate-spin" /> : 'Confirmar Reserva'}
+                                    </button>
+                                </div>
 
                             </motion.div>
                         )}
