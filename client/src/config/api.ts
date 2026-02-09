@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || '/api', // Fallback to proxy in dev if var is missing
+    baseURL: 'https://recovery-web-app-production.up.railway.app/api',
     headers: {
         'Content-Type': 'application/json',
     },
