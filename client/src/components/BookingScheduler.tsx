@@ -16,7 +16,11 @@ const BookingScheduler = ({ onSelect }: BookingSchedulerProps) => {
     const [isLoading, setIsLoading] = useState(false);
 
     // Generate next 14 days
-    const upcomingDates = Array.from({ length: 21 }, (_, i) => addDays(startOfToday(), i));
+    const upcomingDates = Array.from({ length: 21 }, (_, i) => addDays(startOfToday(), i))
+        .filter(date => {
+            const day = date.getDay();
+            return day !== 0 && day !== 6; // 0 Sunday, 6 Saturday
+        });
 
     useEffect(() => {
         const fetchAvailability = async () => {
