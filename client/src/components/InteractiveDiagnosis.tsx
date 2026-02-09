@@ -8,8 +8,12 @@ import BookingScheduler from './BookingScheduler';
 import api from '../config/api';
 
 const diagnosisSchema = z.object({
-    name: z.string().min(2, { message: 'Tu nombre es importante' }),
-    dni: z.string().min(6, { message: 'Ingresa un DNI válido' }),
+    name: z.string()
+        .min(2, { message: 'Tu nombre es importante' })
+        .regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]+$/, { message: 'El nombre solo puede contener letras' })
+        .transform(val => val.trim().replace(/\s+/g, ' ')), // Collapses spaces
+    dni: z.string()
+        .regex(/^\d{8}$/, { message: 'El DNI debe tener exactamente 8 dígitos numéricos' }),
     email: z.string().email({ message: 'Email inválido' }),
     phone: z.string().min(8, { message: 'Ingresa un teléfono válido' }),
     gym: z.string().optional(),
