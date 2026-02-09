@@ -17,9 +17,8 @@ export class AppController {
     };
 
     try {
-      // Simulate webhook call
-      // In a real scenario, we would use an environment variable for the URL
-      const webhookUrl = 'https://lisandros.app.n8n.cloud/webhook/recovery-booking';
+      // Use environment variable for the URL (configured in Railway)
+      const webhookUrl = process.env.N8N_WEBHOOK_URL || 'https://lisandros.app.n8n.cloud/webhook/recovery-booking';
 
       this.logger.log(`Forwarding to webhook: ${webhookUrl}`);
 
@@ -36,7 +35,7 @@ export class AppController {
       // But given it's a "simulated" webhook, let's assume success or handle gracefully.
       // If the webhook URL is fake (simulated), axios will fail.
       // To allow testing without a real webhook:
-      this.logger.warn('Webhook failed (expected if URL is simulated). Returning success anyway for demo.');
+      this.logger.warn('Webhook failed (expected if URL is simulated or invalid). Returning success anyway for demo.');
       return { status: 'success', message: 'Diagnosis received (simulated webhook)' };
     }
   }
@@ -45,9 +44,10 @@ export class AppController {
   async checkAvailability(@Query('date') date: string) {
     this.logger.log(`Checking availability for: ${date}`);
 
-    // N8N Webhook URL for Availability Check
-    // Replace this with your ACTUAL n8n Production URL
-    const n8nUrl = 'https://lisandros.app.n8n.cloud/webhook/recovery-availability';
+    // N8N Webhook URL for Availability Check (configured in Railway)
+    const n8nUrl = process.env.N8N_AVAILABILITY_URL || 'https://lisandros.app.n8n.cloud/webhook/recovery-availability';
+
+    this.logger.log(`Calling n8n availability webhook: ${n8nUrl}`);
 
     try {
       const response = await axios.get(n8nUrl, {
