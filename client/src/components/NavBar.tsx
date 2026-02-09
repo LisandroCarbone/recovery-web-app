@@ -45,7 +45,7 @@ const NavBar = () => {
                                     WhatsApp
                                 </a>
                                 <a
-                                    href="mailto:contacto@bossrecovery.com"
+                                    href="mailto:r2recovery.contacto@gmail.com"
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                                 >
                                     <Mail size={14} className="text-blue-400" />
