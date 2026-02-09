@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, MessageCircle } from 'lucide-react';
+import { MapPin, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const NavBar = () => {

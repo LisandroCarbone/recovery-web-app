@@ -1,5 +1,4 @@
 import Hero from './components/Hero';
-import SocialProof from './components/SocialProof';
 import ScienceBenefits from './components/ScienceBenefits';
 import ServicesGrid from './components/ServicesGrid';
 import HowItWorks from './components/HowItWorks';
