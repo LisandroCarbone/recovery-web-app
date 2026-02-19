@@ -12,7 +12,7 @@ interface BookingSchedulerProps {
 const BookingScheduler = ({ onSelect }: BookingSchedulerProps) => {
     const [selectedDate, setSelectedDate] = useState(startOfToday());
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
-    const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+    const [availableSlots, setAvailableSlots] = useState<{ time: string, spots: number }[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     // Generate next 14 days
@@ -36,11 +36,16 @@ const BookingScheduler = ({ onSelect }: BookingSchedulerProps) => {
 
                 let slots = response.data;
 
-                // Filter past hours if "today" is selected, even if backend returns them
+                // Normalize response: If n8n returns strings (fallback or old logic), convert to objects
+                if (Array.isArray(slots) && typeof slots[0] === 'string') {
+                    slots = slots.map((time: string) => ({ time, spots: 2 }));
+                }
+
+                // Filter past hours if "today" is selected
                 const now = new Date();
                 if (isSameDay(selectedDate, now)) {
-                    slots = slots.filter((slot: string) => {
-                        const [hour, minute] = slot.split(':').map(Number);
+                    slots = slots.filter((slot: { time: string }) => {
+                        const [hour, minute] = slot.time.split(':').map(Number);
                         const slotDate = setMinutes(setHours(selectedDate, hour), minute);
                         return isAfter(slotDate, now);
                     });
@@ -91,9 +96,23 @@ const BookingScheduler = ({ onSelect }: BookingSchedulerProps) => {
                 })}
             </div>
 
-            <div className="flex items-center gap-2 mb-4 mt-6 text-slate-300">
-                <Clock size={18} className="text-accent" />
-                <h3 className="text-lg font-bold">Horarios disponibles</h3>
+            <div className="flex items-center gap-2 mb-4 mt-6 text-slate-300 justify-between">
+                <div className="flex items-center gap-2">
+                    <Clock size={18} className="text-accent" />
+                    <h3 className="text-lg font-bold">Horarios disponibles</h3>
+                </div>
+
+                {/* Legend */}
+                <div className="flex gap-3 text-[10px] uppercase font-bold tracking-wider">
+                    <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                        <span className="text-green-500 hidden sm:block">2 Disp.</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-yellow-400 rounded-full shadow-[0_0_8px_rgba(250,204,21,0.6)]"></div>
+                        <span className="text-yellow-400 hidden sm:block">1 Disp.</span>
+                    </div>
+                </div>
             </div>
 
             {/* Time Slots Grid */}
@@ -103,18 +122,24 @@ const BookingScheduler = ({ onSelect }: BookingSchedulerProps) => {
                         <Loader2 className="animate-spin mr-2" /> cargando...
                     </div>
                 ) : availableSlots.length > 0 ? (
-                    availableSlots.map((time) => (
+                    availableSlots.map((slot) => (
                         <motion.button
-                            key={time}
-                            onClick={() => handleSlotClick(time)}
+                            key={slot.time}
+                            onClick={() => handleSlotClick(slot.time)}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.95 }}
-                            className={`py-3 px-2 rounded-lg text-sm font-bold border transition-all ${selectedTimeSlot === time
-                                ? 'bg-white text-slate-900 border-white'
-                                : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'
-                                }`}
+                            className={`py-3 px-2 rounded-lg text-sm font-bold border transition-all relative overflow-hidden group ${selectedTimeSlot === slot.time
+                                ? 'bg-white text-slate-900 border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]'
+                                : 'bg-slate-900/80 hover:bg-slate-800'
+                                } ${selectedTimeSlot !== slot.time && slot.spots >= 2 ? 'border-green-500/50 text-green-400 shadow-[0_0_10px_rgba(74,222,128,0.1)] hover:border-green-400' : ''} 
+                                  ${selectedTimeSlot !== slot.time && slot.spots === 1 ? 'border-yellow-500/50 text-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.1)] hover:border-yellow-400' : ''}`}
                         >
-                            {time}
+                            {slot.time}
+
+                            {/* Spots Badge (Mobile/Desktop) */}
+                            {selectedTimeSlot !== slot.time && (
+                                <div className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${slot.spots >= 2 ? 'bg-green-500' : 'bg-yellow-400'}`}></div>
+                            )}
                         </motion.button>
                     ))
                 ) : (
