@@ -13,6 +13,12 @@ const NavBar = () => {
                 transition={{ duration: 0.5 }}
                 className="flex items-center gap-4 pointer-events-auto w-fit"
             >
+                {/* Branding */}
+                <div className="flex items-center gap-2 pr-2">
+                    <img src="/r2-logo.svg" alt="R2 Recovery" className="w-6 h-6" />
+                    <span className="font-bold text-white tracking-tight hidden sm:block">R2 Recovery</span>
+                </div>
+
                 {/* Contact Dropdown */}
                 <div className="relative group">
                     <button
@@ -44,7 +50,7 @@ const NavBar = () => {
                                     WhatsApp
                                 </a>
                                 <a
-                                    href="mailto:contacto@bossrecovery.com"
+                                    href="mailto:contacto@r2recovery.com"
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all"
                                 >
                                     <Mail size={14} className="text-blue-400" />
