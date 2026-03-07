@@ -23,21 +23,12 @@ export class CreateDiagnosisDto {
   gym?: string;
 
   @IsString()
-  @IsIn(['Rugby', 'Fútbol', 'Crossfit', 'Handball', 'Running', 'Powerlifting', 'Basketball', 'Fisicoculturismo', 'Otro'])
-  discipline: string;
-
-  @IsNumber()
-  @Min(1)
-  @Max(7)
-  frequency: number;
+  @IsIn(['Recovery', 'Wellness', 'Beauty', 'Masajes'])
+  service: string;
 
   @IsString()
   @IsIn(['Nulo', 'Poco', 'Normal', 'Mucho'])
   painZone: string;
-
-  @IsArray()
-  @IsString({ each: true })
-  interests: string[];
 
   // Optional because they are added in the last step
   @IsString()
