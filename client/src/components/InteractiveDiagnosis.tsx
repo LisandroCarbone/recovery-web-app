@@ -17,10 +17,10 @@ const diagnosisSchema = z.object({
     email: z.string().email({ message: 'Email inválido' }),
     phone: z.string().min(8, { message: 'Ingresa un teléfono válido' }),
     gym: z.string().optional(),
-    discipline: z.string().min(1, { message: 'Selecciona tu disciplina principal' }),
+    service: z.string().min(1, { message: 'Selecciona tu servicio principal' }),
     frequency: z.number().min(1).max(7),
     painZone: z.string().min(1, { message: 'Indícanos dónde necesitas atención' }),
-    interests: z.array(z.string()).min(1, { message: 'Selecciona al menos un servicio' }),
+    interests: z.array(z.string()).min(1, { message: 'Selecciona al menos un servicio extra' }),
 });
 
 type DiagnosisFormValues = z.infer<typeof diagnosisSchema> & {
@@ -36,7 +36,7 @@ const InteractiveDiagnosis = () => {
     const { register, handleSubmit, formState: { errors }, watch, trigger } = useForm<DiagnosisFormValues>({
         resolver: zodResolver(diagnosisSchema),
         defaultValues: {
-            discipline: '',
+            service: '',
             frequency: 3,
             painZone: '',
             interests: [],
@@ -74,13 +74,12 @@ const InteractiveDiagnosis = () => {
     };
 
     const handleProfileSubmit = async () => {
-        const isValid = await trigger(['discipline', 'frequency', 'painZone', 'interests']);
+        const isValid = await trigger(['service', 'frequency', 'painZone', 'interests']);
         if (isValid) {
             setStep(3); // Go to Booking
         }
     };
 
-    const disciplines = ['Rugby', 'Fútbol', 'Crossfit', 'Handball', 'Running', 'Powerlifting', 'Basketball', 'Fisicoculturismo', 'Otro'];
     const knowledgeLevels = ['Nulo', 'Poco', 'Normal', 'Mucho'];
     const services = ['Crioterapia', 'Sauna', 'Crio compresión', 'Electrodos']; // 'Elongación', 'Masajes' son servicios que no se ofrecen
 
@@ -188,22 +187,34 @@ const InteractiveDiagnosis = () => {
                                 className="space-y-8"
                             >
                                 <div className="text-center mb-6">
-                                    <h2 className="text-2xl font-bold text-white mb-2">Perfil Atlético</h2>
+                                    <h2 className="text-2xl font-bold text-white mb-2">Servicio</h2>
                                     <p className="text-secondary text-sm">Nos interesa saber de vos.</p>
                                 </div>
 
-                                {/* Discipline */}
+                                {/* Service (formerly Discipline) */}
                                 <div className="space-y-3">
-                                    <label className="text-sm font-medium text-slate-400">Disciplina Principal</label>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                        {disciplines.map(d => (
-                                            <label key={d} className={`cursor-pointer border rounded-lg p-3 text-center text-sm transition-all ${watch('discipline') === d ? 'border-accent bg-accent/10 text-white' : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600'}`}>
-                                                <input type="radio" value={d} {...register('discipline')} className="hidden" />
-                                                {d}
+                                    <label className="text-sm font-medium text-slate-400">Servicio Principal</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {['Recovery', 'Wellness', 'Beauty', 'Masajes'].map(s => (
+                                            <label key={s} className={`cursor-pointer border rounded-lg p-3 text-center text-sm transition-all ${watch('service') === s ? 'border-accent bg-accent/10 text-white' : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600'}`}>
+                                                <input type="radio" value={s} {...register('service')} className="hidden" />
+                                                {s}
                                             </label>
                                         ))}
                                     </div>
-                                    {errors.discipline && <span className="text-red-400 text-xs">{errors.discipline.message}</span>}
+                                    <AnimatePresence>
+                                        {watch('service') === 'Masajes' && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="text-yellow-400 text-xs flex items-center gap-1 mt-2 bg-yellow-400/10 p-2 rounded-lg border border-yellow-400/20"
+                                            >
+                                                ⚠️ El servicio de Masajes es únicamente los días Lunes y Martes.
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                    {errors.service && <span className="text-red-400 text-xs">{errors.service.message}</span>}
                                 </div>
 
                                 {/* Frequency */}
@@ -281,7 +292,7 @@ const InteractiveDiagnosis = () => {
                                     <p className="text-secondary text-sm">Elegí el día y horario que mas te sirva.</p>
                                 </div>
 
-                                <BookingScheduler onSelect={(date, time) => setBookingData({ date, time })} />
+                                <BookingScheduler onSelect={(date, time) => setBookingData({ date, time })} service={watch('service')} />
 
                                 <div className="flex gap-3 mt-4">
                                     <button

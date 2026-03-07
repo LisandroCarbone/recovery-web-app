@@ -7,9 +7,10 @@ import api from '../config/api';
 
 interface BookingSchedulerProps {
     onSelect: (date: Date, time: string) => void;
+    service?: string; // Optional for backward compatibility, but we pass it now.
 }
 
-const BookingScheduler = ({ onSelect }: BookingSchedulerProps) => {
+const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
     const [selectedDate, setSelectedDate] = useState(startOfToday());
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
     const [availableSlots, setAvailableSlots] = useState<{ time: string, spots: number }[]>([]);
@@ -19,8 +20,24 @@ const BookingScheduler = ({ onSelect }: BookingSchedulerProps) => {
     const upcomingDates = Array.from({ length: 21 }, (_, i) => addDays(startOfToday(), i))
         .filter(date => {
             const day = date.getDay();
-            return day !== 0 && day !== 6; // 0 Sunday, 6 Saturday
+            if (day === 0 || day === 6) return false; // Always exclude Sunday(0) and Saturday(6)
+
+            // Masajes constraint: Only Monday(1) and Tuesday(2)
+            if (service === 'Masajes') {
+                return day === 1 || day === 2;
+            }
+
+            return true; // Other services allow Mon-Fri
         });
+
+    // Auto-select the first available valid date if the currently selected date becomes invalid 
+    // (e.g., user had Wednesday selected, then clicked 'Masajes')
+    useEffect(() => {
+        const isSelectedDateValid = upcomingDates.some(d => isSameDay(d, selectedDate));
+        if (!isSelectedDateValid && upcomingDates.length > 0) {
+            setSelectedDate(upcomingDates[0]);
+        }
+    }, [service, upcomingDates, selectedDate]);
 
     useEffect(() => {
         const fetchAvailability = async () => {
