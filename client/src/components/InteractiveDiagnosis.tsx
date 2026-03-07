@@ -18,9 +18,7 @@ const diagnosisSchema = z.object({
     phone: z.string().min(8, { message: 'Ingresa un teléfono válido' }),
     gym: z.string().optional(),
     service: z.string().min(1, { message: 'Selecciona tu servicio principal' }),
-    frequency: z.number().min(1).max(7),
     painZone: z.string().min(1, { message: 'Indícanos dónde necesitas atención' }),
-    interests: z.array(z.string()).min(1, { message: 'Selecciona al menos un servicio extra' }),
 });
 
 type DiagnosisFormValues = z.infer<typeof diagnosisSchema> & {
@@ -37,9 +35,7 @@ const InteractiveDiagnosis = () => {
         resolver: zodResolver(diagnosisSchema),
         defaultValues: {
             service: '',
-            frequency: 3,
             painZone: '',
-            interests: [],
         }
     });
 
@@ -74,14 +70,13 @@ const InteractiveDiagnosis = () => {
     };
 
     const handleProfileSubmit = async () => {
-        const isValid = await trigger(['service', 'frequency', 'painZone', 'interests']);
+        const isValid = await trigger(['service', 'painZone']);
         if (isValid) {
             setStep(3); // Go to Booking
         }
     };
 
     const knowledgeLevels = ['Nulo', 'Poco', 'Normal', 'Mucho'];
-    const services = ['Crioterapia', 'Sauna', 'Crio compresión', 'Electrodos']; // 'Elongación', 'Masajes' son servicios que no se ofrecen
 
     return (
         <section id="diagnosis" className="py-24 bg-background relative overflow-hidden">
@@ -217,22 +212,6 @@ const InteractiveDiagnosis = () => {
                                     {errors.service && <span className="text-red-400 text-xs">{errors.service.message}</span>}
                                 </div>
 
-                                {/* Frequency */}
-                                <div className="space-y-3">
-                                    <label className="text-sm font-medium text-slate-400 flex justify-between">
-                                        Frecuencia de entrenamiento
-                                        <span className="text-accent">{watch('frequency')} días/sem</span>
-                                    </label>
-                                    <input
-                                        type="range"
-                                        min="1"
-                                        max="7"
-                                        step="1"
-                                        {...register('frequency', { valueAsNumber: true })}
-                                        className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-accent"
-                                    />
-                                </div>
-
                                 {/* Knowledge Level */}
                                 <div className="space-y-3">
                                     <label className="text-sm font-medium text-slate-400">Conocimiento sobre el recovery</label>
@@ -244,20 +223,6 @@ const InteractiveDiagnosis = () => {
                                             </label>
                                         ))}
                                     </div>
-                                </div>
-
-                                {/* Interests */}
-                                <div className="space-y-3">
-                                    <label className="text-sm font-medium text-slate-400">Servicios de interés (Múltiple)</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {services.map(s => (
-                                            <label key={s} className={`cursor-pointer border rounded-full px-4 py-2 text-xs transition-all ${watch('interests')?.includes(s) ? 'border-accent bg-accent text-slate-900 font-bold' : 'border-slate-700 bg-slate-800 text-slate-400'}`}>
-                                                <input type="checkbox" value={s} {...register('interests')} className="hidden" />
-                                                {s}
-                                            </label>
-                                        ))}
-                                    </div>
-                                    {errors.interests && <span className="text-red-400 text-xs">{errors.interests.message}</span>}
                                 </div>
 
                                 <div className="flex gap-3">
