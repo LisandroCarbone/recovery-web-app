@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format, addDays, startOfToday, isSameDay, isAfter, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { motion } from 'framer-motion';
@@ -11,24 +11,26 @@ interface BookingSchedulerProps {
 }
 
 const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
-    const [selectedDate, setSelectedDate] = useState(startOfToday());
+    // Generate next 21 days
+    const upcomingDates = useMemo(() => {
+        return Array.from({ length: 21 }, (_, i) => addDays(startOfToday(), i))
+            .filter(date => {
+                const day = date.getDay();
+                if (day === 0 || day === 6) return false; // Always exclude Sunday(0) and Saturday(6)
+
+                // Masajes constraint: Only Monday(1) and Tuesday(2)
+                if (service === 'Masajista') {
+                    return day === 1 || day === 2;
+                }
+
+                return true; // Other services allow Mon-Fri
+            });
+    }, [service]);
+
+    const [selectedDate, setSelectedDate] = useState(() => upcomingDates.length > 0 ? upcomingDates[0] : startOfToday());
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
     const [availableSlots, setAvailableSlots] = useState<{ time: string, spots: number }[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-
-    // Generate next 14 days
-    const upcomingDates = Array.from({ length: 21 }, (_, i) => addDays(startOfToday(), i))
-        .filter(date => {
-            const day = date.getDay();
-            if (day === 0 || day === 6) return false; // Always exclude Sunday(0) and Saturday(6)
-
-            // Masajes constraint: Only Monday(1) and Tuesday(2)
-            if (service === 'Masajista') {
-                return day === 1 || day === 2;
-            }
-
-            return true; // Other services allow Mon-Fri
-        });
 
     // Auto-select the first available valid date if the currently selected date becomes invalid 
     // (e.g., user had Wednesday selected, then clicked 'Masajes')
@@ -37,12 +39,15 @@ const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
         if (!isSelectedDateValid && upcomingDates.length > 0) {
             setSelectedDate(upcomingDates[0]);
         }
-    }, [service, upcomingDates, selectedDate]);
+    }, [upcomingDates, selectedDate]);
 
     useEffect(() => {
+        let isMounted = true;
+
         const fetchAvailability = async () => {
             setIsLoading(true);
             setAvailableSlots([]); // Clear previous slots while loading
+            setSelectedTimeSlot(null); // Clear selected slot on date change
 
             try {
                 const formattedDate = format(selectedDate, 'yyyy-MM-dd');
@@ -50,6 +55,8 @@ const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
                 const response = await api.get('/availability', {
                     params: { date: formattedDate }
                 });
+
+                if (!isMounted) return; // Prevent race conditions
 
                 let slots = response.data;
 
@@ -79,15 +86,21 @@ const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
 
                 setAvailableSlots(slots);
             } catch (error) {
+                if (!isMounted) return;
                 console.error('Error fetching availability:', error);
             } finally {
-                setIsLoading(false);
-                setSelectedTimeSlot(null);
+                if (isMounted) {
+                    setIsLoading(false);
+                }
             }
         };
 
         fetchAvailability();
-    }, [selectedDate]);
+
+        return () => {
+            isMounted = false; // Cleanup to prevent state updates on unmounted or stale components
+        };
+    }, [selectedDate, service]);
 
     const handleSlotClick = (time: string) => {
         setSelectedTimeSlot(time);
