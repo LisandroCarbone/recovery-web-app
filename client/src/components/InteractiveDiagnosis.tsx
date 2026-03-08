@@ -84,7 +84,7 @@ const InteractiveDiagnosis = () => {
                 <div className="max-w-2xl w-full bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl">
                     <div className="mb-8 text-center">
                         <span className="text-secondary text-sm font-medium uppercase tracking-widest">
-                            Fase {step} de 4
+                            Paso {step} de 3
                         </span>
                         <div className="h-1 w-full bg-slate-800 rounded-full mt-4 overflow-hidden">
                             <motion.div
@@ -190,7 +190,7 @@ const InteractiveDiagnosis = () => {
                                 <div className="space-y-3">
                                     <label className="text-sm font-medium text-slate-400">Servicio Principal</label>
                                     <div className="grid grid-cols-2 gap-3">
-                                        {['Recovery', 'Wellness', 'Beauty', 'Masajes'].map(s => (
+                                        {['Recovery', 'Wellness', 'Beauty', 'Masajista'].map(s => (
                                             <label key={s} className={`cursor-pointer border rounded-lg p-3 text-center text-sm transition-all ${watch('service') === s ? 'border-accent bg-accent/10 text-white' : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600'}`}>
                                                 <input type="radio" value={s} {...register('service')} className="hidden" />
                                                 {s}
@@ -198,14 +198,14 @@ const InteractiveDiagnosis = () => {
                                         ))}
                                     </div>
                                     <AnimatePresence>
-                                        {watch('service') === 'Masajes' && (
+                                        {watch('service') === 'Masajista' && (
                                             <motion.div
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
                                                 exit={{ opacity: 0, height: 0 }}
                                                 className="text-yellow-400 text-xs flex items-center gap-1 mt-2 bg-yellow-400/10 p-2 rounded-lg border border-yellow-400/20"
                                             >
-                                                ⚠️ El servicio de Masajes es únicamente los días Lunes y Martes.
+                                                ⚠️ El servicio de Masajista es únicamente los días Lunes y Martes.
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
