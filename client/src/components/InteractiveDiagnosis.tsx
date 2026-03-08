@@ -82,19 +82,21 @@ const InteractiveDiagnosis = () => {
         <section id="diagnosis" className="py-24 bg-background relative overflow-hidden">
             <div className="container mx-auto px-6 relative z-10 flex flex-col items-center">
                 <div className="max-w-2xl w-full bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl">
-                    <div className="mb-8 text-center">
-                        <span className="text-secondary text-sm font-medium uppercase tracking-widest">
-                            Paso {step} de 3
-                        </span>
-                        <div className="h-1 w-full bg-slate-800 rounded-full mt-4 overflow-hidden">
-                            <motion.div
-                                className="h-full bg-accent"
-                                initial={{ width: 0 }}
-                                animate={{ width: `${(step / 4) * 100}%` }}
-                                transition={{ duration: 0.5 }}
-                            />
+                    {step < 4 && (
+                        <div className="mb-8 text-center">
+                            <span className="text-secondary text-sm font-medium uppercase tracking-widest">
+                                Paso {step} de 3
+                            </span>
+                            <div className="h-1 w-full bg-slate-800 rounded-full mt-4 overflow-hidden">
+                                <motion.div
+                                    className="h-full bg-accent"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${(step / 3) * 100}%` }}
+                                    transition={{ duration: 0.5 }}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <AnimatePresence mode="wait">
                         {step === 1 && (
