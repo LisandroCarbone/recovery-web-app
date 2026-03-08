@@ -284,7 +284,7 @@ const InteractiveDiagnosis = () => {
 
                         {step === 4 && (
                             <motion.div
-                                key="step4"
+                                key="step3"
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 className="text-center py-8"
