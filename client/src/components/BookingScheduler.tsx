@@ -23,7 +23,7 @@ const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
             if (day === 0 || day === 6) return false; // Always exclude Sunday(0) and Saturday(6)
 
             // Masajes constraint: Only Monday(1) and Tuesday(2)
-            if (service === 'Masajes') {
+            if (service === 'Masajista') {
                 return day === 1 || day === 2;
             }
 
@@ -57,6 +57,15 @@ const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
                 if (Array.isArray(slots) && typeof slots[0] === 'string') {
                     slots = slots.map((time: string) => ({ time, spots: 2 }));
                 }
+
+                // Masajes Capacity Override
+                slots = slots.map((slot: any) => {
+                    let effectiveSpots = slot.spots;
+                    if (service === 'Masajes' && slot.masajesAvailable !== undefined) {
+                        effectiveSpots = slot.masajesAvailable;
+                    }
+                    return { ...slot, spots: effectiveSpots, originalSpots: slot.spots, masajesAvailable: slot.masajesAvailable };
+                }).filter((slot: any) => slot.spots > 0); // Don't show slots where this service is full
 
                 // Filter past hours if "today" is selected
                 const now = new Date();
