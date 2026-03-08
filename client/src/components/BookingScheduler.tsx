@@ -61,7 +61,7 @@ const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
                 // Masajes Capacity Override
                 slots = slots.map((slot: any) => {
                     let effectiveSpots = slot.spots;
-                    if (service === 'Masajes' && slot.masajesAvailable !== undefined) {
+                    if (service === 'Masajista' && slot.masajesAvailable !== undefined) {
                         effectiveSpots = slot.masajesAvailable;
                     }
                     return { ...slot, spots: effectiveSpots, originalSpots: slot.spots, masajesAvailable: slot.masajesAvailable };
