@@ -156,7 +156,7 @@ const InteractiveDiagnosis = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-400 mb-1">Club / Gimnasio (Opcional)</label>
+                                        <label className="block text-sm font-medium text-slate-400 mb-1">Establecimiento / Profesional (Opcional)</label>
                                         <input
                                             {...register('gym')}
                                             className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
@@ -295,7 +295,8 @@ const InteractiveDiagnosis = () => {
                                     <CheckCircle className="w-10 h-10 text-green-500" />
                                 </div>
                                 <h2 className="text-3xl font-bold text-white mb-2">¡Reserva Confirmada!</h2>
-                                <p className="text-secondary mb-8">Te hemos enviado los detalles a tu correo. Prepárate para volver a tu 100%.</p>
+                                <p className="text-secondary mb-6">Te hemos enviado los detalles a tu correo. Prepárate para volver a tu 100%.</p>
+                                <p className="text-slate-600 text-xs leading-relaxed max-w-sm mx-auto">Al concurrir y utilizar los servicios de R2 Recovery, el usuario acepta que la marca y sus responsables no se hacen cargo por consecuencias o efectos secundarios antes, durante o posteriores a la sesión.</p>
                             </motion.div>
                         )}
                     </AnimatePresence>

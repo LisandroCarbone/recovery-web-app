@@ -26,7 +26,7 @@ const WhatsAppButton = () => {
 
             {/* Tooltip on hover */}
             <span className="absolute right-full mr-4 bg-white text-slate-900 px-3 py-1 rounded-lg text-sm font-bold shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap hidden md:block">
-                ¡Hablanos!
+                Por cancelaciones o consultas
             </span>
         </motion.a>
     );
