@@ -207,7 +207,7 @@ const InteractiveDiagnosis = () => {
                                                 exit={{ opacity: 0, height: 0 }}
                                                 className="text-yellow-400 text-xs flex items-center gap-1 mt-2 bg-yellow-400/10 p-2 rounded-lg border border-yellow-400/20"
                                             >
-                                                ⚠️ El servicio de Masajista es únicamente los días Lunes y Martes.
+                                                ⚠️ El servicio de Masajista es únicamente los días Lunes, Martes y Jueves.
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
