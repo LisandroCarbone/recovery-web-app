@@ -18,9 +18,9 @@ const BookingScheduler = ({ onSelect, service }: BookingSchedulerProps) => {
                 const day = date.getDay();
                 if (day === 0 || day === 6) return false; // Always exclude Sunday(0) and Saturday(6)
 
-                // Masajes constraint: Only Monday(1) and Tuesday(2)
+                // Masajes constraint: Monday(1), Tuesday(2), and Thursday(4)
                 if (service === 'Masajista') {
-                    return day === 1 || day === 2;
+                    return day === 1 || day === 2 || day === 4;
                 }
 
                 return true; // Other services allow Mon-Fri
