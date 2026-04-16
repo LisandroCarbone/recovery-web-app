@@ -22,13 +22,14 @@ export class AuthService {
         name: data.name,
         dni: data.dni,
         phone: data.phone,
+        gym: data.gym,
       }
     });
 
     const payload = { sub: user.id, email: user.email };
     return {
       access_token: await this.jwtService.signAsync(payload),
-      user: { id: user.id, email: user.email, name: user.name, phone: user.phone, dni: user.dni }
+      user: { id: user.id, email: user.email, name: user.name, phone: user.phone, dni: user.dni, gym: user.gym }
     };
   }
 
@@ -42,7 +43,7 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email };
     return {
       access_token: await this.jwtService.signAsync(payload),
-      user: { id: user.id, email: user.email, name: user.name, phone: user.phone, dni: user.dni }
+      user: { id: user.id, email: user.email, name: user.name, phone: user.phone, dni: user.dni, gym: user.gym }
     };
   }
 }

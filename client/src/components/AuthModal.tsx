@@ -16,7 +16,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
     const [appointments, setAppointments] = useState<any[]>([]);
 
     const [form, setForm] = useState({
-        email: '', password: '', name: '', dni: '', phone: ''
+        email: '', password: '', name: '', dni: '', phone: '', gym: ''
     });
 
     useEffect(() => {
@@ -206,6 +206,10 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
                                                         <label className="block text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Celular</label>
                                                         <input required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent" placeholder="WhatsApp" />
                                                     </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Establecimiento / Profesional (Opcional)</label>
+                                                    <input value={form.gym} onChange={e => setForm({...form, gym: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent" placeholder="Ej. Club Argentino de Rugby" />
                                                 </div>
                                             </>
                                         )}

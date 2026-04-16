@@ -53,6 +53,7 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                 email: user.email || '',
                 phone: user.phone || '',
                 dni: user.dni || '',
+                gym: user.gym || '',
                 service: '',
                 painZone: ''
             });

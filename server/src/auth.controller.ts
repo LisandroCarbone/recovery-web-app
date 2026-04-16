@@ -32,7 +32,7 @@ export class AuthController {
       const payload = await this.jwtService.verifyAsync(token);
       const user = await this.prisma.user.findUnique({ where: { id: payload.sub }});
       if(!user) throw new UnauthorizedException();
-      return { id: user.id, email: user.email, name: user.name, phone: user.phone, dni: user.dni };
+      return { id: user.id, email: user.email, name: user.name, phone: user.phone, dni: user.dni, gym: user.gym };
     } catch {
       throw new UnauthorizedException();
     }

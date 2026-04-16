@@ -17,6 +17,7 @@ model User {
   name         String
   dni          String?
   phone        String?
+  gym          String?
   appointments Appointment[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
