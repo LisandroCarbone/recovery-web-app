@@ -23,7 +23,7 @@ export class CreateDiagnosisDto {
   gym?: string;
 
   @IsString()
-  @IsIn(['Recovery', 'Wellness', 'Beauty', 'Masajista'])
+  @IsIn(['Recovery Total', 'Full Relax', 'Botas Compresión', 'Masajista'])
   service: string;
 
   @IsString()

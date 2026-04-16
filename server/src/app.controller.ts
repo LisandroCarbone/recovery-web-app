@@ -1,15 +1,55 @@
-import { Controller, Post, Get, Body, Query, ValidationPipe, UsePipes, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Param, Body, Query, ValidationPipe, UsePipes, Logger, Req, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { CreateDiagnosisDto } from './diagnosis.dto';
 import axios from 'axios';
+import { PrismaService } from './prisma.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('api')
 export class AppController {
   private readonly logger = new Logger(AppController.name);
 
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService
+  ) {}
+
   @Post('diagnosis')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  async submitDiagnosis(@Body() createDiagnosisDto: CreateDiagnosisDto) {
+  async submitDiagnosis(@Body() createDiagnosisDto: CreateDiagnosisDto, @Req() req: any) {
     this.logger.log(`Received diagnosis for: ${createDiagnosisDto.email}`);
+
+    // Try extract user if token exists (not strictly guarded)
+    let userId = null;
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        if (token) {
+          const payload = await this.jwtService.verifyAsync(token);
+          userId = payload?.sub || null;
+        }
+      }
+    } catch {
+      // ignore
+    }
+
+    // Save to DB
+    let appointment;
+    try {
+      appointment = await this.prisma.appointment.create({
+        data: {
+          userId,
+          service: createDiagnosisDto.service,
+          bookingDate: createDiagnosisDto.bookingDate ? new Date(createDiagnosisDto.bookingDate) : new Date(),
+          bookingTime: createDiagnosisDto.bookingTime || 'TBD',
+          painZone: createDiagnosisDto.painZone,
+          gym: createDiagnosisDto.gym,
+        }
+      });
+      this.logger.log(`Saved appointment to DB with ID: ${appointment.id}`);
+    } catch (e) {
+      this.logger.error('Failed to save to DB', e);
+    }
 
     const payload = {
       ...createDiagnosisDto,
@@ -28,13 +68,6 @@ export class AppController {
       return { status: 'success', message: 'Diagnosis received and processed' };
     } catch (error) {
       this.logger.error('Failed to forward to webhook', error);
-      // We still return success to the client to not block the UX if the webhook fails, 
-      // or we could throw an exception. 
-      // For this requirement: "Devolver un estatus 201 al frontend si el webhook responde OK."
-      // If webhook fails, we should probably throw or return error.
-      // But given it's a "simulated" webhook, let's assume success or handle gracefully.
-      // If the webhook URL is fake (simulated), axios will fail.
-      // To allow testing without a real webhook:
       this.logger.warn('Webhook failed (expected if URL is simulated or invalid). Returning success anyway for demo.');
       return { status: 'success', message: 'Diagnosis received (simulated webhook)' };
     }
@@ -43,36 +76,58 @@ export class AppController {
   @Get('availability')
   async checkAvailability(@Query('date') date: string) {
     this.logger.log(`Checking availability for: ${date}`);
-
-    // N8N Webhook URL for Availability Check (configured in Railway)
     const n8nUrl = process.env.N8N_AVAILABILITY_URL || 'https://lisandros.app.n8n.cloud/webhook/recovery-availability';
-
-    this.logger.log(`Calling n8n availability webhook: ${n8nUrl}`);
-
     try {
-      const response = await axios.get(n8nUrl, {
-        params: { date }
-      });
-
-      // Validation: Ensure we got an Array from n8n
-      // n8n returns { slots: [...] } now
+      const response = await axios.get(n8nUrl, { params: { date } });
       const slots = response.data.slots || response.data;
-
-      if (!Array.isArray(slots)) {
-        throw new Error('Invalid response from n8n (not an array)');
-      }
-
+      if (!Array.isArray(slots)) throw new Error('Invalid response from n8n (not an array)');
       return slots;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        this.logger.error(`Axios Error Data: ${JSON.stringify(error.response?.data)}`);
-        this.logger.error(`Axios Error Status: ${error.response?.status}`);
-      }
-
-      // Fallback Logic (Deterministic)
-      // Return a fixed set of slots so we know it's the fallback
-      // Updated schedule: 8:00, 9:30, 11:00, 12:30, 14:00, 15:30, 17:00, 18:30
       return ["08:00", "09:30", "11:00", "12:30", "14:00", "15:30", "17:00", "18:30"];
     }
+  }
+
+  @Get('appointments')
+  async getAppointments(@Req() req: any) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw new UnauthorizedException();
+    const token = authHeader.split(' ')[1];
+    
+    let payload;
+    try {
+      payload = await this.jwtService.verifyAsync(token);
+    } catch {
+      throw new UnauthorizedException();
+    }
+    
+    return this.prisma.appointment.findMany({
+      where: { userId: payload.sub },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  @Delete('appointments/:id')
+  async cancelAppointment(@Param('id') id: string, @Req() req: any) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) throw new UnauthorizedException();
+    const token = authHeader.split(' ')[1];
+    
+    let payload;
+    try {
+      payload = await this.jwtService.verifyAsync(token);
+    } catch {
+      throw new UnauthorizedException();
+    }
+    
+    const appointment = await this.prisma.appointment.findUnique({ where: { id }});
+    if (!appointment) throw new NotFoundException();
+    if (appointment.userId !== payload.sub) throw new UnauthorizedException();
+
+    await this.prisma.appointment.update({
+      where: { id },
+      data: { status: 'CANCELLED' }
+    });
+
+    return { success: true };
   }
 }

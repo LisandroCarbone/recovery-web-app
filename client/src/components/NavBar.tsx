@@ -1,8 +1,8 @@
-import { MapPin, MessageCircle, ChevronDown, Mail } from 'lucide-react';
+import { MapPin, MessageCircle, ChevronDown, Mail, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
-const NavBar = () => {
+const NavBar = ({ onAuthClick, user }: { onAuthClick: () => void, user: any }) => {
     const [isContactOpen, setIsContactOpen] = useState(false);
 
     return (
@@ -69,8 +69,17 @@ const NavBar = () => {
                     className="flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-white transition-colors group bg-slate-950/30 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800/50 hover:border-accent/50 hover:bg-slate-900/60"
                 >
                     <MapPin size={14} className="text-secondary group-hover:text-accent transition-colors" />
-                    <span>Donde Estamos?</span>
+                    <span className="hidden sm:inline">Donde Estamos?</span>
                 </a>
+
+                {/* Login/Profile */}
+                <button
+                    onClick={onAuthClick}
+                    className={`flex items-center gap-2 text-sm font-bold transition-colors group px-4 py-2 rounded-full border backdrop-blur-md ${user ? 'bg-accent/10 border-accent/30 text-accent hover:bg-accent/20' : 'bg-slate-800/80 border-slate-700 text-white hover:bg-slate-700'}`}
+                >
+                    <User size={14} />
+                    <span className="hidden sm:inline">{user ? user.name.split(' ')[0] : 'Ingresar'}</span>
+                </button>
             </motion.div>
         </nav>
     );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -6,6 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle, ChevronRight } from 'lucide-react';
 import BookingScheduler from './BookingScheduler';
 import api from '../config/api';
+
+const SERVICES = [
+    { id: 'Recovery Total', name: 'Recovery Total', desc: '(Sauna, Pileta, Botas)', price: 35000 },
+    { id: 'Full Relax', name: 'Full Relax', desc: '(Sauna y Botas)', price: 30000 },
+    { id: 'Botas Compresión', name: 'Botas Compresión', desc: '(Botas)', price: 25000 },
+    { id: 'Masajista', name: 'Masajista', desc: 'Lunes, Martes y Jueves', price: 45000 }
+];
 
 const diagnosisSchema = z.object({
     name: z.string()
@@ -26,18 +33,33 @@ type DiagnosisFormValues = z.infer<typeof diagnosisSchema> & {
     bookingTime?: string;
 };
 
-const InteractiveDiagnosis = () => {
+const InteractiveDiagnosis = ({ user }: { user?: any }) => {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingData, setBookingData] = useState<{ date: Date, time: string } | null>(null);
 
-    const { register, handleSubmit, formState: { errors }, watch, trigger } = useForm<DiagnosisFormValues>({
+    const { register, handleSubmit, formState: { errors }, watch, trigger, reset } = useForm<DiagnosisFormValues>({
         resolver: zodResolver(diagnosisSchema),
         defaultValues: {
             service: '',
             painZone: '',
         }
     });
+
+    useEffect(() => {
+        if (user) {
+            reset({
+                name: user.name || '',
+                email: user.email || '',
+                phone: user.phone || '',
+                dni: user.dni || '',
+                service: '',
+                painZone: ''
+            });
+            // Auto skip to step 2 since we have their info
+            setStep(2);
+        }
+    }, [user, reset]);
 
     const onSubmit = async (data: DiagnosisFormValues) => {
         // Only submit if we have booking data when we are at the final step
@@ -191,11 +213,13 @@ const InteractiveDiagnosis = () => {
                                 {/* Service (formerly Discipline) */}
                                 <div className="space-y-3">
                                     <label className="text-sm font-medium text-slate-400">Servicio Principal</label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {['Recovery', 'Wellness', 'Beauty', 'Masajista'].map(s => (
-                                            <label key={s} className={`cursor-pointer border rounded-lg p-3 text-center text-sm transition-all ${watch('service') === s ? 'border-accent bg-accent/10 text-white' : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600'}`}>
-                                                <input type="radio" value={s} {...register('service')} className="hidden" />
-                                                {s}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {SERVICES.map(s => (
+                                            <label key={s.id} className={`cursor-pointer border rounded-lg p-4 flex flex-col items-center justify-center text-center text-sm transition-all ${watch('service') === s.id ? 'border-accent bg-accent/10 text-white' : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600'}`}>
+                                                <input type="radio" value={s.id} {...register('service')} className="hidden" />
+                                                <span className="font-bold text-base">{s.name}</span>
+                                                {s.desc && <span className="text-xs text-slate-500 mt-1">{s.desc}</span>}
+                                                <span className="font-semibold text-accent mt-2">${s.price.toLocaleString()}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -284,21 +308,50 @@ const InteractiveDiagnosis = () => {
                             </motion.div>
                         )}
 
-                        {step === 4 && (
-                            <motion.div
-                                key="step3"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="text-center py-8"
-                            >
-                                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <CheckCircle className="w-10 h-10 text-green-500" />
-                                </div>
-                                <h2 className="text-3xl font-bold text-white mb-2">¡Reserva Confirmada!</h2>
-                                <p className="text-secondary mb-6">Te hemos enviado los detalles a tu correo. Prepárate para volver a tu 100%.</p>
-                                <p className="text-slate-600 text-xs leading-relaxed max-w-sm mx-auto">Al concurrir y utilizar los servicios de R2 Recovery, el usuario acepta que la marca y sus responsables no se hacen cargo por consecuencias o efectos secundarios antes, durante o posteriores a la sesión.</p>
-                            </motion.div>
-                        )}
+                        {step === 4 && (() => {
+                            const selectedService = SERVICES.find(s => s.id === watch('service'));
+                            const amount = selectedService?.price || 0;
+                            const waText = encodeURIComponent(`¡Hola! Acabo de hacer la reserva de ${selectedService?.name}. Te envío el comprobante de pago por $${amount}.`);
+                            return (
+                                <motion.div
+                                    key="step4"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="text-center py-8"
+                                >
+                                    <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <CheckCircle className="w-10 h-10 text-green-500" />
+                                    </div>
+                                    <h2 className="text-3xl font-bold text-white mb-2">¡Reserva Confirmada!</h2>
+                                    <p className="text-secondary mb-6">Te hemos enviado los detalles a tu correo. Por favor, completa el pago para confirmar.</p>
+
+                                    <div className="bg-slate-800/80 rounded-2xl p-6 mb-8 text-left max-w-sm mx-auto border border-slate-700">
+                                        <h3 className="text-lg font-semibold text-white mb-4 border-b border-slate-700 pb-2">Detalles de Pago</h3>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-slate-400">{selectedService?.name}</span>
+                                            <span className="text-white font-bold">${amount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="mt-4 p-4 bg-slate-900 rounded-xl">
+                                            <p className="text-sm text-slate-400 mb-1">Transferir a Cuenta BruBank</p>
+                                            <p className="text-white font-mono font-bold tracking-wider">r2recovery</p>
+                                            <p className="text-xs text-slate-500 mt-2">Cristobal Carbone</p>
+                                        </div>
+                                    </div>
+
+                                    <a
+                                        href={`https://wa.me/5491112341015?text=${waText}`} // TODO: Replace with real number
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center justify-center gap-2 bg-green-500 text-white font-bold py-4 px-8 rounded-xl hover:bg-green-600 transition-colors shadow-lg shadow-green-500/30 mb-8"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                        Avisar por WhatsApp
+                                    </a>
+
+                                    <p className="text-slate-600 text-xs leading-relaxed max-w-sm mx-auto mt-4">Al concurrir y utilizar los servicios de R2 Recovery, el usuario acepta que la marca y sus responsables no se hacen cargo por consecuencias o efectos secundarios antes, durante o posteriores a la sesión.</p>
+                                </motion.div>
+                            );
+                        })()}
                     </AnimatePresence>
                 </div>
             </div>
