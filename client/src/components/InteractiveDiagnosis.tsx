@@ -219,7 +219,6 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                                                 <input type="radio" value={s.id} {...register('service')} className="hidden" />
                                                 <span className="font-bold text-base">{s.name}</span>
                                                 {s.desc && <span className="text-xs text-slate-500 mt-1">{s.desc}</span>}
-                                                <span className="font-semibold text-accent mt-2">${s.price.toLocaleString()}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -249,6 +248,7 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                                             </label>
                                         ))}
                                     </div>
+                                    {errors.painZone && <span className="text-red-400 text-xs block mt-2 text-center">{errors.painZone.message}</span>}
                                 </div>
 
                                 <div className="flex gap-3">
