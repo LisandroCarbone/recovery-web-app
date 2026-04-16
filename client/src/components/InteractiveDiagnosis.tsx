@@ -311,7 +311,7 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                         {step === 4 && (() => {
                             const selectedService = SERVICES.find(s => s.id === watch('service'));
                             const amount = selectedService?.price || 0;
-                            const waText = encodeURIComponent(`¡Hola! Acabo de hacer la reserva de ${selectedService?.name}. Te envío el comprobante de pago por $${amount}.`);
+                            const waText = encodeURIComponent(`¡Hola! Acabo de hacer la reserva de ${selectedService?.name}. Ahora te envío el comprobante de pago por $${amount}.`);
                             return (
                                 <motion.div
                                     key="step4"

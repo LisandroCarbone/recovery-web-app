@@ -154,7 +154,19 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
                                         )}
                                     </div>
 
-                                    <button onClick={logout} className="w-full flex items-center justify-center gap-2 border border-slate-700 text-slate-300 py-3 rounded-xl hover:bg-slate-800 transition-colors">
+                                    <div className="flex gap-4 mt-6">
+                                        <button onClick={() => {
+                                            onClose();
+                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                        }} className="flex-1 bg-accent text-slate-900 font-bold py-3 rounded-xl hover:bg-lime-400 transition-colors">
+                                            Reservar Turno
+                                        </button>
+                                        <button onClick={onClose} className="flex-1 border border-slate-700 text-slate-300 font-medium py-3 rounded-xl hover:bg-slate-800 transition-colors">
+                                            Quiero Navegar
+                                        </button>
+                                    </div>
+
+                                    <button onClick={logout} className="w-full flex items-center justify-center gap-2 border border-slate-700 text-slate-300 py-3 rounded-xl hover:bg-slate-800 transition-colors mt-4">
                                         <LogOut size={16} /> Cerrar Sesión
                                     </button>
                                 </div>
