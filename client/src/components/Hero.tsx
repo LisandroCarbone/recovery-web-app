@@ -15,15 +15,15 @@ const Hero = () => {
             <div className="absolute inset-0 z-0 bg-background flex items-center justify-center overflow-hidden">
                 <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px]" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px]" />
-                
+
                 {/* Rotating Watermark Logo */}
-                <motion.img 
-                    src="/LOGO%20R2%20ICON.png" 
+                <motion.img
+                    src="/LOGO%20R2%20ICON.png"
                     alt="R2 Watermark"
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 120, ease: "linear" }}
                     className="absolute w-[800px] h-[800px] opacity-10 object-contain pointer-events-none mix-blend-screen"
-                    style={{ maskImage: 'radial-gradient(circle, black 30%, transparent 60%)', WebkitMaskImage: 'radial-gradient(circle, black 30%, transparent 60%)' }}
+                    style={{ maskImage: 'radial-gradient(circle, black 20%, transparent 30%)', WebkitMaskImage: 'radial-gradient(circle, black 20%, transparent 30%)' }}
                 />
             </div>
 
