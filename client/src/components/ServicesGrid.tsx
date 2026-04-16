@@ -32,12 +32,12 @@ const services = [
     },
     {
         id: 4,
-        title: 'Sauna Infrarrojo',
+        title: 'Botas de Compresión',
         icon: Waves,
-        shortDesc: 'Detoxificación profunda.',
-        fullDesc: 'Calor penetrante que eleva la temperatura central, promoviendo la vasodilatación, la relajación muscular y la eliminación de toxinas a nivel celular.',
-        sensation: 'Calor envolvente y relajante, sin el agobio del vapor.',
-        benefit: 'Mejora cardiovascular y relajación mental total.'
+        shortDesc: 'Recuperación muscular acelerada y reducción del dolor.',
+        fullDesc: 'Masaje neumático secuencial que imita el bombeo muscular natural, eliminando residuos metabólicos y reduciendo la pesadez en las piernas.',
+        sensation: 'Un masaje profundo y rítmico que recorre tus piernas de abajo hacia arriba.',
+        benefit: 'Recuperación muscular acelerada y reducción del dolor.'
     },
     {
         id: 5,
