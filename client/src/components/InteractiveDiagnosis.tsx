@@ -339,7 +339,7 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                                     </div>
 
                                     <a
-                                        href={`https://wa.me/5491112341015?text=${waText}`} // TODO: Replace with real number
+                                        href={`https://wa.me/5491164831015?text=${waText}`} // TODO: Replace with real number
                                         target="_blank"
                                         rel="noreferrer"
                                         className="inline-flex items-center justify-center gap-2 bg-green-500 text-white font-bold py-4 px-8 rounded-xl hover:bg-green-600 transition-colors shadow-lg shadow-green-500/30 mb-8"
