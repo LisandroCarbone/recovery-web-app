@@ -73,9 +73,18 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
     const cancelAppointment = async (id: string) => {
         if (!confirm('¿Estás seguro de cancelar este turno?')) return;
         try {
+            const app = appointments.find(a => a.id === id);
             await api.delete(`/appointments/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
+            
+            if (app) {
+                const formattedDate = app.bookingDate.split('T')[0].split('-').reverse().join('/');
+                const timeText = app.bookingTime;
+                const waText = encodeURIComponent(`Disculpame. Acabo de cancelar el turno de ${formattedDate} a las ${timeText}hs.`);
+                window.open(`https://wa.me/5491164831015?text=${waText}`, '_blank');
+            }
+
             fetchAppointments();
         } catch (e) {
             alert('No se pudo cancelar el turno.');
@@ -140,10 +149,11 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
                                                                 {app.status}
                                                             </span>
                                                         </div>
-                                                        {app.status !== 'CANCELLED' && (
+                                        {app.status !== 'CANCELLED' && (
                                                             <button 
                                                                 onClick={() => cancelAppointment(app.id)}
-                                                                className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                                                                className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors border border-transparent hover:border-red-400/20"
+                                                                title="Cancelar turno"
                                                             >
                                                                 <CalendarX2 size={18} />
                                                             </button>
@@ -157,7 +167,12 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
                                     <div className="flex gap-4 mt-6">
                                         <button onClick={() => {
                                             onClose();
-                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            const target = document.getElementById('diagnosis');
+                                            if (target) {
+                                                target.scrollIntoView({ behavior: 'smooth' });
+                                            } else {
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }
                                         }} className="flex-1 bg-accent text-slate-900 font-bold py-3 rounded-xl hover:bg-lime-400 transition-colors">
                                             Reservar Turno
                                         </button>

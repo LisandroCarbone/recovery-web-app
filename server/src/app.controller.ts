@@ -128,6 +128,22 @@ export class AppController {
       data: { status: 'CANCELLED' }
     });
 
+    try {
+      const user = await this.prisma.user.findUnique({ where: { id: payload.sub }});
+      const cancelWebhookUrl = process.env.N8N_CANCEL_WEBHOOK_URL || 'https://lisandros.app.n8n.cloud/webhook/recovery-cancel';
+      
+      this.logger.log(`Forwarding cancellation to webhook: ${cancelWebhookUrl}`);
+      await axios.post(cancelWebhookUrl, {
+        appointmentId: id,
+        service: appointment.service,
+        bookingDate: appointment.bookingDate,
+        bookingTime: appointment.bookingTime,
+        user: { name: user?.name, email: user?.email, dni: user?.dni, phone: user?.phone }
+      });
+    } catch (e) {
+      this.logger.error('Failed to notify n8n of cancellation', e);
+    }
+
     return { success: true };
   }
 }
