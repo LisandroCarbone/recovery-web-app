@@ -130,7 +130,7 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                                 className="space-y-6"
                             >
                                 <div className="text-center mb-8">
-                                    <h2 className="text-3xl font-bold text-white mb-2">Comencemos</h2>
+                                    <h2 className="text-3xl font-bold text-white mb-2">Reserva sin usuario</h2>
                                     <p className="text-secondary">Datos básicos para la reserva de tu sesión.</p>
                                 </div>
 

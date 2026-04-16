@@ -224,13 +224,20 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
                                         </button>
                                     </form>
 
-                                    <div className="text-center mt-4 pt-4 border-t border-slate-800/50">
+                                    <div className="text-center mt-4 pt-4 border-t border-slate-800/50 flex flex-col gap-3">
                                         <button 
                                             type="button" 
                                             onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
                                             className="text-sm font-medium text-slate-400 hover:text-accent transition-colors"
                                         >
                                             {mode === 'login' ? '¿No tenés cuenta? Registrate' : '¿Ya tenés cuenta? Iniciá sesión'}
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={onClose}
+                                            className="text-sm font-medium text-slate-500 hover:text-white transition-colors"
+                                        >
+                                            Seguir como invitado
                                         </button>
                                     </div>
                                 </div>

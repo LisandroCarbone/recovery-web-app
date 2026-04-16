@@ -15,7 +15,7 @@ const NavBar = ({ onAuthClick, user }: { onAuthClick: () => void, user: any }) =
             >
                 {/* Branding */}
                 <div className="flex items-center gap-2 pr-2">
-                    <img src="/r2-logo.svg" alt="R2 Recovery" className="w-6 h-6" />
+                    <img src="/LOGO%20R2%20ICON.png" alt="R2 Recovery" className="w-8 h-8 object-contain" />
                     <span className="font-bold text-white tracking-tight hidden sm:block">R2 Recovery</span>
                 </div>
 
