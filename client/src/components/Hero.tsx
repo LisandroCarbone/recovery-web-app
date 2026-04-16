@@ -23,6 +23,7 @@ const Hero = () => {
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 120, ease: "linear" }}
                     className="absolute w-[800px] h-[800px] opacity-10 object-contain pointer-events-none mix-blend-screen"
+                    style={{ maskImage: 'radial-gradient(circle, black 30%, transparent 60%)', WebkitMaskImage: 'radial-gradient(circle, black 30%, transparent 60%)' }}
                 />
             </div>
 
