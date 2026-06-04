@@ -19,13 +19,12 @@ const diagnosisSchema = z.object({
         .min(2, { message: 'Tu nombre es importante' })
         .regex(/^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]+$/, { message: 'El nombre solo puede contener letras' })
         .transform(val => val.trim().replace(/\s+/g, ' ')), // Collapses spaces
-    dni: z.string()
-        .regex(/^\d{8}$/, { message: 'El DNI debe tener exactamente 8 dígitos numéricos' }),
+    dni: z.string().optional(),
     email: z.string().email({ message: 'Email inválido' }),
     phone: z.string().min(8, { message: 'Ingresa un teléfono válido' }),
     gym: z.string().optional(),
     service: z.string().min(1, { message: 'Selecciona tu servicio principal' }),
-    painZone: z.string().min(1, { message: 'Indícanos dónde necesitas atención' }),
+    painZone: z.string().optional(),
 });
 
 type DiagnosisFormValues = z.infer<typeof diagnosisSchema> & {
@@ -43,6 +42,8 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
         defaultValues: {
             service: '',
             painZone: '',
+            dni: '',
+            gym: '',
         }
     });
 
@@ -86,24 +87,38 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
     };
 
     const nextStep = async () => {
-        const isValid = await trigger(['name', 'dni', 'email', 'phone']);
+        const isValid = await trigger(['name', 'email', 'phone']);
         if (isValid) {
             setStep(2);
         }
     };
 
     const handleProfileSubmit = async () => {
-        const isValid = await trigger(['service', 'painZone']);
+        const isValid = await trigger(['service']);
         if (isValid) {
             setStep(3); // Go to Booking
         }
     };
 
-    const knowledgeLevels = ['Nulo', 'Poco', 'Normal', 'Mucho'];
-
     return (
         <section id="diagnosis" className="py-24 bg-background relative overflow-hidden">
             <div className="container mx-auto px-6 relative z-10 flex flex-col items-center">
+                
+                {/* WhatsApp direct contact banner */}
+                <div className="max-w-2xl w-full mb-8 text-center bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm">
+                    <p className="text-secondary text-sm md:text-base">
+                        💬 ¿Preferís reservar de forma directa o tenés dudas? <br />
+                        <a 
+                            href="https://wa.me/5491164831015" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-accent font-bold hover:text-accent/80 transition-colors inline-flex items-center gap-1.5 mt-1 underline decoration-dotted"
+                        >
+                            Podés sacar turnos o hacer tus consultas acá
+                        </a>
+                    </p>
+                </div>
+
                 <div className="max-w-2xl w-full bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl">
                     {step < 4 && (
                         <div className="mb-8 text-center">
@@ -146,16 +161,7 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                                         {errors.name && <span className="text-red-400 text-xs mt-1 block">{errors.name.message}</span>}
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-400 mb-1">DNI</label>
-                                        <input
-                                            {...register('dni')}
-                                            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
-                                            placeholder="Ej. 12345678"
-                                            type="number"
-                                        />
-                                        {errors.dni && <span className="text-red-400 text-xs mt-1 block">{errors.dni.message}</span>}
-                                    </div>
+
 
                                     <div>
                                         <label className="block text-sm font-medium text-slate-400 mb-1">Email</label>
@@ -238,19 +244,7 @@ const InteractiveDiagnosis = ({ user }: { user?: any }) => {
                                     {errors.service && <span className="text-red-400 text-xs">{errors.service.message}</span>}
                                 </div>
 
-                                {/* Knowledge Level */}
-                                <div className="space-y-3">
-                                    <label className="text-sm font-medium text-slate-400">Conocimiento sobre el recovery</label>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                        {knowledgeLevels.map(k => (
-                                            <label key={k} className={`cursor-pointer border rounded-lg p-3 text-center text-sm transition-all ${watch('painZone') === k ? 'border-accent bg-accent/10 text-white' : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600'}`}>
-                                                <input type="radio" value={k} {...register('painZone')} className="hidden" />
-                                                {k}
-                                            </label>
-                                        ))}
-                                    </div>
-                                    {errors.painZone && <span className="text-red-400 text-xs block mt-2 text-center">{errors.painZone.message}</span>}
-                                </div>
+
 
                                 <div className="flex gap-3">
                                     <button

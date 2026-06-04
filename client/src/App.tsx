@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Hero from './components/Hero';
 import ScienceBenefits from './components/ScienceBenefits';
 import ServicesGrid from './components/ServicesGrid';
-import HowItWorks from './components/HowItWorks';
+// import HowItWorks from './components/HowItWorks';
 import InteractiveDiagnosis from './components/InteractiveDiagnosis';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
@@ -19,7 +19,7 @@ function App() {
       <Hero />
       <ScienceBenefits />
       <ServicesGrid />
-      <HowItWorks />
+      {/* <HowItWorks /> */}
       <InteractiveDiagnosis user={user} />
       <Footer />
       <WhatsAppButton />

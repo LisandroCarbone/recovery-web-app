@@ -1,4 +1,5 @@
 import { Brain, Flame, Moon } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const benefits = [
     {
@@ -41,6 +42,37 @@ const ScienceBenefits = () => {
                             </p>
                         </div>
                     ))}
+                </div>
+
+                <div className="mt-16 flex justify-center">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                            const element = document.getElementById('diagnosis');
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }}
+                        className="group relative inline-flex items-center gap-3 px-8 py-4 bg-accent text-background text-lg font-bold rounded-full hover:shadow-[0_0_20px_rgba(190,242,100,0.4)] transition-all duration-300"
+                    >
+                        Reserva tu espacio
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="20" 
+                            height="20" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2.5" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            className="group-hover:translate-x-1 transition-transform"
+                        >
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </motion.button>
                 </div>
             </div>
         </section>

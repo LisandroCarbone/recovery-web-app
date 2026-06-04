@@ -41,23 +41,33 @@ const Hero = () => {
                         </span>
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold text-primary tracking-tight mb-8 leading-tight">
+                    <h1 className="text-5xl md:text-7xl font-bold text-primary tracking-tight mb-2 leading-tight">
                         Recovery to be<span className="text-accent"> ready </span>.
                     </h1>
+                    
+                    <p className="text-accent text-sm md:text-base font-bold uppercase tracking-[0.25em] mb-8 text-center">
+                        Resultados inmediatos
+                    </p>
 
                     <p className="text-xl md:text-2xl text-secondary mb-10 max-w-2xl mx-auto font-light">
                         Tecnología de élite y metodologías para atletas profesionales o qué viven como uno de ellos.
                     </p>
 
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={scrollToDiagnosis}
-                        className="group relative inline-flex items-center gap-3 px-8 py-4 bg-accent text-background text-lg font-bold rounded-full hover:shadow-[0_0_20px_rgba(190,242,100,0.4)] transition-all duration-300"
-                    >
-                        Reserva tu espacio
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </motion.button>
+                    <div className="flex flex-col items-center gap-4">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={scrollToDiagnosis}
+                            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-accent text-background text-lg font-bold rounded-full hover:shadow-[0_0_20px_rgba(190,242,100,0.4)] transition-all duration-300"
+                        >
+                            Reserva tu espacio
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </motion.button>
+
+                        <p className="text-secondary text-sm">
+                            ¿Dudas? <a href="https://wa.me/5491164831015" target="_blank" rel="noopener noreferrer" className="text-accent font-bold hover:text-accent/80 transition-colors underline decoration-dotted">Podés sacar turnos o hacer tus consultas acá</a>
+                        </p>
+                    </div>
 
                     {/* Powered by BOSS Badge */}
                     <motion.div

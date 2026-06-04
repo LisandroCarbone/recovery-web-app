@@ -16,7 +16,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
     const [appointments, setAppointments] = useState<any[]>([]);
 
     const [form, setForm] = useState({
-        email: '', password: '', name: '', dni: '', phone: '', gym: ''
+        email: '', password: '', name: '', phone: '', gym: ''
     });
 
     useEffect(() => {
@@ -197,15 +197,9 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }: AuthModalProps) => {
                                                     <label className="block text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Nombre</label>
                                                     <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent" placeholder="Nombre completo" />
                                                 </div>
-                                                <div className="flex gap-4">
-                                                    <div className="w-1/2">
-                                                        <label className="block text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">DNI</label>
-                                                        <input required value={form.dni} onChange={e => setForm({...form, dni: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent" placeholder="DNI" />
-                                                    </div>
-                                                    <div className="w-1/2">
-                                                        <label className="block text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Celular</label>
-                                                        <input required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent" placeholder="WhatsApp" />
-                                                    </div>
+                                                <div>
+                                                    <label className="block text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Celular</label>
+                                                    <input required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent" placeholder="WhatsApp" />
                                                 </div>
                                                 <div>
                                                     <label className="block text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Establecimiento / Profesional (Opcional)</label>

@@ -8,8 +8,8 @@ export class CreateDiagnosisDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
-  dni: string;
+  @IsOptional()
+  dni?: string;
 
   @IsEmail()
   email: string;
@@ -27,8 +27,8 @@ export class CreateDiagnosisDto {
   service: string;
 
   @IsString()
-  @IsIn(['Nulo', 'Poco', 'Normal', 'Mucho'])
-  painZone: string;
+  @IsOptional()
+  painZone?: string;
 
   // Optional because they are added in the last step
   @IsString()
