@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Hero from './components/Hero';
 import ScienceBenefits from './components/ScienceBenefits';
 import ServicesGrid from './components/ServicesGrid';
+import Memberships from './components/Memberships';
 // import HowItWorks from './components/HowItWorks';
 import InteractiveDiagnosis from './components/InteractiveDiagnosis';
 import Footer from './components/Footer';
@@ -19,6 +20,7 @@ function App() {
       <Hero />
       <ScienceBenefits />
       <ServicesGrid />
+      <Memberships />
       {/* <HowItWorks /> */}
       <InteractiveDiagnosis user={user} />
       <Footer />
