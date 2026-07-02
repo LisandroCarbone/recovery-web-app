@@ -10,8 +10,7 @@ const plans = [
         features: [
             '2 Sesiones de Recovery (Sauna, Crio, Botas, Electrodos)',
             'Acceso a todas las tecnologías de recuperación',
-            'Soporte y asesoramiento básico',
-            'Ideal para principiantes o mantenimiento mensual'
+            'Soporte y asesoramiento básico'
         ],
         theme: {
             bg: 'bg-slate-900/60',
@@ -46,12 +45,12 @@ const plans = [
         name: 'Oro',
         price: '150.000',
         recoverySessions: '4 sesiones de Recovery al mes',
-        massageSessions: '1 sesión de Masaje Deportivo / Kinesiología al mes',
+        massageSessions: '1 sesión de Masajista al mes',
         features: [
             '4 Sesiones de Recovery (Sauna, Crio, Botas, Electrodos)',
-            '1 Masaje Deportivo o Sesión de Kinesiología',
+            '1 turno con nuestro masajista al mes',
             'Seguimiento de prevención de lesiones',
-            'Acceso total a Kinesiología + Masajes'
+            'Acceso total a turnos de Masajes'
         ],
         theme: {
             bg: 'bg-slate-900/60',
@@ -66,10 +65,10 @@ const plans = [
         name: 'Black',
         price: '220.000',
         recoverySessions: 'Sesiones libres de Recovery (Ilimitadas)',
-        massageSessions: '2 sesiones de Masaje Deportivo / Kinesiología al mes',
+        massageSessions: '2 sesiones de Masajista al mes',
         features: [
             'Recovery Total Ilimitado (Sesiones libres)',
-            '2 Masajes Deportivos o Sesiones de Kinesiología',
+            '2 turnos con nuestro masajista al mes',
             'Atención hiper-prioritaria',
             'El plan definitivo para deportistas de élite'
         ],
