@@ -5,6 +5,7 @@ const plans = [
     {
         name: 'Básica',
         price: '60.000',
+        otherPaymentPrice: '66.000',
         recoverySessions: '2 sesiones de Recovery al mes',
         massageSessions: 'No incluye masajes',
         features: [
@@ -24,6 +25,7 @@ const plans = [
     {
         name: 'Plata',
         price: '110.000',
+        otherPaymentPrice: '121.000',
         recoverySessions: '4 sesiones de Recovery al mes',
         massageSessions: 'No incluye masajes',
         features: [
@@ -44,6 +46,7 @@ const plans = [
     {
         name: 'Oro',
         price: '150.000',
+        otherPaymentPrice: '165.000',
         recoverySessions: '4 sesiones de Recovery al mes',
         massageSessions: '1 sesión de Masajista al mes',
         features: [
@@ -64,6 +67,7 @@ const plans = [
     {
         name: 'Black',
         price: '220.000',
+        otherPaymentPrice: '242.000',
         recoverySessions: 'Sesiones libres de Recovery (Ilimitadas)',
         massageSessions: '2 sesiones de Masajista al mes',
         features: [
@@ -137,12 +141,18 @@ const Memberships = () => {
                                 </div>
 
                                 {/* Price */}
-                                <div className="mb-6 flex items-baseline">
+                                <div className="mb-2 flex items-baseline">
                                     <span className="text-3xl font-black text-white">$</span>
                                     <span className="text-5xl font-extrabold text-white tracking-tight">
                                         {plan.price}
                                     </span>
                                     <span className="text-slate-500 text-sm font-semibold ml-2">/ mes</span>
+                                </div>
+
+                                {/* Payment Breakdown Note */}
+                                <div className="mb-6 text-xs text-slate-400 font-medium space-y-0.5 leading-snug">
+                                    <p>Valor con transferencia o efectivo.</p>
+                                    <p><span className="text-slate-300 font-semibold">${plan.otherPaymentPrice}</span> con otros medios de pago.</p>
                                 </div>
 
                                 {/* Main Session Highlights */}
