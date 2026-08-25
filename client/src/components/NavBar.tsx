@@ -63,7 +63,7 @@ const NavBar = ({ onAuthClick, user }: { onAuthClick: () => void, user: any }) =
 
                 {/* Direct Links */}
                 <a
-                    href="https://www.google.com/maps/search/?api=1&query=Av.+Regimiento+de+Patricios+860,+CABA"
+                    href="https://maps.app.goo.gl/iKzPDBbJM56KBJDS9"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-white transition-colors group bg-slate-950/30 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800/50 hover:border-accent/50 hover:bg-slate-900/60"

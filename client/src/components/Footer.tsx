@@ -7,13 +7,13 @@ const Footer = () => {
                 <div className="flex flex-col items-center gap-6">
                     {/* Location */}
                     <a
-                        href="https://www.google.com/maps/search/?api=1&query=Av.+Regimiento+de+Patricios+860,+CABA"
+                        href="https://maps.app.goo.gl/iKzPDBbJM56KBJDS9"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-slate-400 hover:text-accent transition-colors group"
+                        className="flex items-center gap-2 text-slate-400 hover:text-accent transition-colors group text-center"
                     >
-                        <MapPin size={18} className="text-secondary group-hover:text-accent transition-colors" />
-                        <span>Av. Regimiento de Patricios 860, CABA</span>
+                        <MapPin size={18} className="text-secondary group-hover:text-accent transition-colors shrink-0" />
+                        <span>Av. Manuel Belgrano 5770, Wilde, Avellaneda</span>
                     </a>
 
                     {/* Powered by BOSS */}
